@@ -1,0 +1,42 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "tsx watch server.ts",
+    "dev:ts-node": "ts-node --esm server.ts",
+    "build": "pnpm prisma generate && tsc",
+    "start": "node dist/server.js",
+    "seed": "tsx scripts/seed.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.873.0",
+    "@fastify/cors": "11.1.0",
+    "@fastify/multipart": "9.0.3",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.3",
+    "@prisma/client": "6.14.0",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.0",
+    "fastify": "^5.4.0",
+    "firebase-admin": "^13.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^6.14.0",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.0.12",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

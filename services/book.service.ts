@@ -1,0 +1,738 @@
+import { PrismaClient } from "@prisma/client";
+import type { Book, BooksResponse, BookCollection, bookCollectionMetadataFields, Summary, TranslatedSummary } from "../types/books.js";
+const prisma = new PrismaClient();
+
+export const createBook = async (book: Book, translatedBook: any[]): Promise<Partial<Book> | string> => {
+    try {
+        const result = await prisma.$transaction(async (prisma) => {
+            const newBook = await prisma.book.create({
+                data: {
+                    title: book.title,
+                    // Fix: authors should be connected as a relation, not assigned as an array of strings
+                    authors: {
+                        connect: book.authors.map((authorId: string) => ({
+                            id: authorId,
+                        })),
+                    },
+                    totalDuration: book.totalDuration,
+                    slug: book.slug, // Ensure 'slug' exists on the Book type or generate it here
+                    categories: {
+                        connect: book.categories.map((category) => ({
+                            id: category,
+                        })),
+                    },
+                },
+            });
+            await prisma.translatedBook.createMany({
+                data: translatedBook.map((item) => ({
+                    title: item.title,
+                    description: item.description,
+                    language: item.language,
+                    published: Boolean(item.published),
+                    audioEnabled: Boolean(item.audioEnabled),
+                    bookId: newBook.id,
+                    coverUrl: item.imageUrl
+                })),
+            });
+            return newBook;
+        }, {
+            timeout: 30000 // Increase timeout to 30 seconds
+        });
+        return result;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to create book';
+    }
+}
+
+export const updateBook = async (id: string, book: Partial<Book>, translatedBook: any): Promise<Partial<Book> | string> => {
+    try {
+        const result = await prisma.$transaction(async (prisma) => {
+            const updatedBook = await prisma.book.update({
+                where: { id: id },
+                data: {
+                    title: book.title,
+                    slug: book.slug,
+                    totalDuration: book.totalDuration,
+                    authors: {
+                        set: book.authors ? book.authors.map((authorId: string) => ({ id: authorId })) : [],
+                    },
+                    // Handle categories as a relation update
+                    categories: {
+                        set: book.categories ? book.categories.map((category) => ({ id: category })) : [],
+                    },
+                },
+            });
+
+            // Update each translated book by language
+            for (const translation of translatedBook) {
+                await prisma.translatedBook.updateMany({
+                    where: {
+                        bookId: id,
+                        language: translation.language
+                    },
+                    data: {
+                        title: translation.title,
+                        description: translation.description,
+                        published: Boolean(translation.published),
+                        audioEnabled: Boolean(translation.audioEnabled),
+                        coverUrl: translation.coverUrl
+                    },
+                });
+            }
+
+            // Update summaries if provided
+
+            return updatedBook;
+        }, {
+            timeout: 30000 // Increase timeout to 30 seconds
+        });
+        return result;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to update book';
+    }
+}
+
+export const getBooks = async (page: string, language: string): Promise<{ books: BooksResponse[], page: number, limit: number, total: number } | string> => {
+    try {
+        const pageNumber = parseInt(page);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+        const total = await prisma.book.count();
+        let books;
+        if (language !== 'all') {
+            books = await prisma.translatedBook.findMany({
+            skip,
+            take: limit,
+            where: {
+                language: language,
+            },
+            include: {
+                book: {
+                    select: {
+                        totalDuration: true,
+                        authors: {
+                            select: {
+                                id: true,
+                            }
+                        },
+                    }
+                },
+            }
+        });
+        } else {
+            books = await prisma.book.findMany({
+                skip,
+                take: limit,
+                include: {
+                    translations: {
+                        select: {
+                            title: true,
+                            description: true,
+                            published: true,
+                            audioEnabled: true,
+                            coverUrl: true,
+                            language: true,
+                        }
+                    }
+                }
+            });
+        }
+
+        return {
+            books: books as BooksResponse[],
+            page: pageNumber,
+            limit,
+            total: total,
+        };
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get books';
+    }
+}
+
+export const getBookById = async (id: string, language: string) => {
+
+    try {
+        let book
+        if (language != 'all') {
+            console.log("language", language);
+
+            book = await prisma.translatedBook.findFirst({
+                where: {
+                    bookId: id,
+                    language: language,
+                },
+                select: {
+                    bookId: true,
+                    title: true,
+                    description: true,
+                    published: true,
+                    audioEnabled: true,
+                    book: {
+                        select: {
+                            authors: {
+                                select: {
+                                    id: true,
+                                },
+                            },
+                            totalDuration: true,
+                            categories: {
+                                select: {
+                                    id: true,
+                                },
+                            },
+                        }
+                    }
+                }
+            });
+        } else {
+            const translatedBooks = await prisma.translatedBook.findMany({
+                where: {
+                    bookId: id,
+                },
+                select: {
+                    bookId: true,
+                    title: true,
+                    coverUrl: true,
+                    description: true,
+                    published: true,
+                    language: true,
+                    audioEnabled: true,
+                }
+            });
+            const bookDetails = await prisma.book.findUnique({
+                where: { id: id },
+                select: {
+                    authors: true,
+                    categories: true,
+                    totalDuration: true,
+                }
+            });
+            book = {
+                translations: translatedBooks,
+                book: bookDetails
+            };
+        }
+        if (!book) {
+            return 'Book not found';
+        }
+        return book;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get book';
+    }
+}
+
+export const searchBooks = async (query: string, language: string, page: string) => {
+    try {
+        const pageNumber = parseInt(page);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+        const books = await prisma.translatedBook.findMany({
+            skip,
+            take: limit,
+            where: {
+                language: language,
+                title: {
+                    contains: query,
+                    mode: 'insensitive',
+                }
+            }, select: {
+                title: true,
+                description: true,
+                bookId: true,
+                coverUrl: true,
+
+            }
+        });
+        return books;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to search books';
+    }
+}
+
+export const createBookCollection = async (metadata: bookCollectionMetadataFields, translatedCollection: BookCollection[]) => {
+
+    try {
+        const result = await prisma.$transaction(async (prisma) => {
+            const collection = await prisma.bookCollection.create({
+                data: {
+                    title: metadata.title,
+                    imageUrl: metadata.imageUrl,
+                    books: metadata.books,
+                    slug: metadata.slug,
+                },
+            });
+            await prisma.translatedBookCollection.createMany({
+                data: translatedCollection.map((item) => ({
+                    language: item.language,
+                    title: item.title,
+                    description: item.description,
+                    bookCollectionId: collection.id,
+                })),
+            });
+            return {
+                collection,
+                translatedCollection
+            };
+        }, {
+            timeout: 30000 // Increase timeout to 30 seconds
+        });
+        return result;
+
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to create book collection';
+    }
+}
+
+export const updateBookCollection = async (id: string, metadata: bookCollectionMetadataFields, translatedCollection: BookCollection[]) => {
+    try {
+        const result = await prisma.$transaction(async (prisma) => {
+            const updatedCollection = await prisma.bookCollection.update({
+                where: { id: id },
+                data: {
+                    title: metadata.title,
+                    imageUrl: metadata.imageUrl,
+                    books: metadata.books,
+                },
+            });
+            for (const translation of translatedCollection) {
+                await prisma.translatedBookCollection.update({
+                    where: { bookCollectionId_language: { bookCollectionId: id, language: translation.language } },
+                    data: {
+                        title: translation.title,
+                        description: translation.description,
+                    },
+                });
+            }
+            return updatedCollection;
+        }, {
+            timeout: 30000 // Increase timeout to 30 seconds
+        });
+        return result;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to update book collection';
+    }
+}
+
+export const getBookCollections = async (page: string, language: string) => {
+    try {
+        const pageNumber = parseInt(page);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+        const total = await prisma.bookCollection.count();
+
+        const collections = await prisma.translatedBookCollection.findMany({
+            skip,
+            take: limit,
+            where: {
+                language: language
+            },
+            include: {
+                bookCollection: {
+                    select: {
+                        id: true,
+                        imageUrl: true,
+                        books: true
+                    }
+                }
+            }
+        });
+        return {
+            page: pageNumber,
+            limit,
+            total: total,
+            collections: collections.map(col => ({
+                id: col.bookCollection.id,
+                title: col.title,
+                description: col.description,
+                imageUrl: col.bookCollection.imageUrl,
+                books: col.bookCollection.books.length,
+            }))
+        };
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get book collections';
+    }
+}
+
+export const getBookCollectionById = async (id: string, language: string, includeBooks: boolean) => {
+    console.log("id", id);
+    console.log("language", language);
+    try {
+        let collection
+        let books
+        if (language !== 'all') {
+            collection = await prisma.translatedBookCollection.findFirst({
+                where: {
+                    bookCollectionId: id,
+                    language: language
+                },
+                include: {
+                    bookCollection: {
+                        select: {
+                            id: true,
+                            imageUrl: true,
+                            books: true
+                        }
+                    }
+                }
+            });
+            if (!includeBooks) {
+                return collection;
+            }
+            books = await getBooksByIds(collection?.bookCollection.books || [], language);
+        } else {
+            collection = await prisma.bookCollection.findUnique({
+                where: { id: id },
+                include: {
+                    TranslatedBookCollection: true,
+                }
+            });
+            if (!includeBooks) {
+                return collection;
+            }
+            books = await getBooksByIds(collection?.books || [], 'en');
+        }
+
+        return {
+            collection,
+            books
+        };
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get book collection';
+    }
+}
+
+const getBooksByIds = async (ids: string[], language: string) => {
+    try {
+        const books = await prisma.translatedBook.findMany({
+            where: {
+                bookId: {
+                    in: ids,
+                },
+                language: language,
+            },
+            include: {
+                book: {
+                    select: {
+                        authors: {
+                            select: {
+                                translations: {
+                                    where: { language: language }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        return books;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get books by IDs';
+    }
+}
+
+
+export const getBooksByAuthorId = async (authorId: string, language: string, page: string) => {
+    try {
+        const pageNumber = parseInt(page);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const total = await prisma.book.count({
+            where: {
+                authors: {
+                    some: {
+                        id: authorId,
+                    },
+                },
+            },
+        });
+
+        const books = await prisma.book.findMany({
+            where: {
+                authors: {
+                    some: {
+                        id: authorId,
+                    },
+                },
+            },
+            include: {
+                translations: {
+                    where: {
+                        language: language
+                    },
+                    select: {
+                        id: true,
+                        title: true,
+                        coverUrl: true
+                    }
+
+                }
+            },
+            skip,
+            take: limit,
+        });
+        return {
+            books: books,
+            page: pageNumber,
+            limit,
+            total: total,
+        };
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get books by author ID';
+    }
+}
+
+export const getBooksByCategorySlug = async (categorySlug: string, language: string, page: string) => {
+    try {
+        const pageNumber = parseInt(page);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+        const total = await prisma.book.count({
+            where: {
+                categories: {
+                    some: {
+                        slug: categorySlug,
+                    },
+                },
+            },
+        });
+        const books = await prisma.book.findMany({
+            where: {
+                categories: {
+                    some: {
+                        slug: categorySlug,
+                    },
+                },
+            },
+            include: {
+                translations: {
+                    where: {
+                        language: language
+                    },
+                    select: {
+                        id: true,
+                        title: true,
+                        coverUrl: true
+                    }
+                }
+            },
+            skip,
+            take: limit,
+        });
+
+        return {
+            books: books,
+            page: pageNumber,
+            limit,
+            total: total,
+        };
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get books by category slug';
+    }
+}
+
+export const getBooksByCategoryIds = async (categoryIds: string[], language: string, page: string) => {
+    console.log("entered")
+    try {
+        const pageNumber = parseInt(page);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const count = await prisma.book.count({
+            where: {
+                categories: {
+                    some: {
+                        id: {
+                            in: categoryIds,
+                        }
+                    }
+                }
+            }
+        })
+
+        const books = await prisma.book.findMany({
+            where: {
+                categories: {
+                    some: {
+                        id: {
+                            in: categoryIds,
+                        },
+                    },
+                },
+            },
+            include: {
+                translations: {
+                    where: {
+                        language: language
+                    },
+                    select: {
+                        id: true,
+                        title: true,
+                        coverUrl: true
+                    }
+                }
+            },
+            skip,
+            take: limit,
+        });
+
+
+        return {
+            books: books,
+            page: pageNumber,
+            limit,
+            total: count,
+        };
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get books by category IDs';
+    }
+}
+
+export const getBookBySlug = async (slug: string, language: string) => {
+    try {
+        const book = await prisma.book.findUnique({
+            where: {
+                slug: slug,
+            },
+            include: {
+                translations: {
+                    where: {
+                        language: language
+                    },
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        published: true,
+                        audioEnabled: true,
+                        coverUrl: true
+                    }
+                }
+            }
+        });
+        return book;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get book by slug';
+    }
+}
+
+export const getBookCollectionsByIds = async (ids: string[]) => {
+    try {
+        console.log("ids", ids);
+        const collections = await prisma.bookCollection.findMany({
+            where: {
+                id: { in: ids },
+            },
+        });
+        console.log("collections", collections);
+        return collections;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get book collections by IDs';
+    }
+}
+
+export const createSummary = async (summary: Summary, translatedSummary: TranslatedSummary[], id: string) => {
+    try {
+        const result = await prisma.$transaction(async (prisma) => {
+            const newSummary = await prisma.summary.create({
+                data: {
+                    title: summary.title,
+                    order: summary.order,
+                    bookId: id,
+                },
+            });
+            await prisma.translatedSummary.createMany({
+                data: translatedSummary.map((item) => ({
+                    title: item.title,
+                    content: item.content,
+                    keyTakeaways: item.keyTakeaways,
+                    language: item.language,
+                    summaryId: newSummary.id,
+                })),
+            });
+            return newSummary;
+        }, {
+            timeout: 30000 // Increase timeout to 30 seconds
+        });
+        return result;
+    }catch(error: unknown){
+        console.error(error);
+        return 'Failed to create summary';
+    }
+}
+
+export const editSummary = async (id: string, summary: Summary, translatedSummary: TranslatedSummary[], summaryId: string) => {
+    try {
+        const result = await prisma.$transaction(async (prisma) => {
+            const updatedSummary = await prisma.summary.update({
+                where: { id: summaryId },
+                data: summary,
+            });
+            for (const translation of translatedSummary) {
+                await prisma.translatedSummary.update({
+                    where: { summaryId_language: { summaryId: summaryId, language: translation.language } },
+                    data: translation,
+                });
+            }
+            return updatedSummary;
+        }, {
+            timeout: 30000 // Increase timeout to 30 seconds
+        });
+        return result;
+    }
+    catch(error: unknown){
+        console.error(error);
+        return 'Failed to edit summary';
+    }
+}
+
+export const getSummariesByBookId = async (bookId: string, language: string) => {
+    try {
+        let summaries
+        if (language !== 'all') {
+        summaries = await prisma.summary.findMany({
+            where: { bookId: bookId },
+            include: {
+                TranslatedSummary: {
+                    where: { language: language },
+                }
+            }
+        });
+    }else{
+        summaries = await prisma.summary.findMany({
+            where: { bookId: bookId },
+            include: {
+                TranslatedSummary: true,
+            }
+        });
+    }
+        return summaries;
+    }
+    catch(error: unknown){
+        console.error(error);
+        return 'Failed to get summaries by book ID';
+    }
+}
+

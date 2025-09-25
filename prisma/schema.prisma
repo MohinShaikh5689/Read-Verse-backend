@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String            @id
+  name            String
+  email           String            @unique
+  gender          String?
+  profilePicture  String?
+  dob             String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  userPreferences userPreferences[]
+  userProgress    userProgress[]
+  BookMark        BookMark[]
+}
+
+model userPreferences {
+  id                  String         @id @default(uuid())
+  allowRemainders     Boolean        @default(true)
+  appLangauge         String         @default("en")
+  authorPreferences   String[]       @default([])
+  categoryPreferences String[]       @default([])
+  bookPreferences     String[]       @default([])
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String         @unique
+}
+
+model userProgress {
+  bookId      String
+  userId      String
+  completed   Boolean  @default(false)
+  lastChapter Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  book              Book             @relation(fields: [bookId], references: [id])
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, userId])
+}
+
+model BookMark {
+  id        String   @id @default(uuid())
+  bookId    String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  book      Book     @relation(fields: [bookId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Author {
+  id        String   @id @default(uuid())
+  name      String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  translations TranslatedAuthor[]
+  Guests       Podcast[]          @relation("Guests")
+  Podcast      Podcast?           @relation(fields: [podcastId], references: [id])
+  podcastId    String?
+  Book         Book[]
+
+  @@index([id, name])
+}
+
+model TranslatedAuthor {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  language    String
+  authorId    String
+  author      Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([authorId, language])
+  @@index([language])
+}
+
+model Book {
+  id            String           @id @default(uuid())
+  title         String
+  authors       Author[]
+  totalDuration Int
+  slug          String           @unique
+  translations  TranslatedBook[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  categories       Category[]
+  summaries        Summary[]
+  userProgress     userProgress[]
+  BookMark         BookMark[]
+
+  @@index([id, title, slug])
+}
+
+model TranslatedBook {
+  id           String   @id @default(uuid())
+  title        String
+  coverUrl     String?
+  description  String
+  language     String
+  published    Boolean
+  audioEnabled Boolean  @default(false)
+  bookId       String
+  book         Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([bookId, language])
+  @@index([language])
+}
+
+model Summary {
+  id                String              @id @default(uuid())
+  title             String
+  order             Int
+  bookId            String
+  book              Book                @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  TranslatedSummary TranslatedSummary[]
+
+  @@unique([bookId, order])
+  @@index([bookId])
+}
+
+model TranslatedSummary {
+  id           String   @id @default(uuid())
+  title        String
+  content      String
+  audioUrl     String?
+  keyTakeaways String[]
+  language     String
+  summaryId    String
+  summary      Summary  @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([summaryId, language])
+  @@index([language])
+}
+
+model Category {
+  id            String               @id @default(uuid())
+  name          String
+  categorySVG   String
+  categoryImage String
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  slug          String               @unique
+  books         Book[]
+  translations  TranslatedCategory[]
+  podcasts      Podcast[]
+
+  @@index([name, slug, id])
+}
+
+model TranslatedCategory {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  language    String
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([categoryId, language])
+  @@index([language])
+}
+
+model PodcastCollection {
+  id           String                        @id @default(uuid())
+  name         String
+  imageUrl     String
+  createdAt    DateTime                      @default(now())
+  updatedAt    DateTime                      @updatedAt
+  slug         String                        @unique
+  translations TranslatedPodcastCollection[]
+  podcastsIds  String[]
+
+  @@index([name, slug, id])
+}
+
+model TranslatedPodcastCollection {
+  id                  String            @id @default(uuid())
+  name                String
+  description         String
+  language            String
+  podcastCollectionId String
+  podcastCollection   PodcastCollection @relation(fields: [podcastCollectionId], references: [id], onDelete: Cascade)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([podcastCollectionId, language])
+  @@index([language])
+}
+
+model Podcast {
+  id            String              @id @default(uuid())
+  title         String
+  imageUrl      String
+  totalDuration Int
+  published     Boolean
+  slug          String              @unique
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  categories    Category[]
+  translations  TranslatedPodcast[]
+  speakers      Author[]
+  guests        Author[]            @relation("Guests")
+
+  @@index([title])
+}
+
+model TranslatedPodcast {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  summary      String
+  audioUrl     String?
+  keyTakeaways String[]
+  language     String
+  podcastId    String
+  podcast      Podcast  @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+
+  @@unique([podcastId, language])
+  @@index([language])
+}
+
+model BookCollection {
+  id                       String                     @id @default(uuid())
+  title                    String
+  imageUrl                 String
+  slug                     String                     @unique
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  books                    String[]
+  TranslatedBookCollection TranslatedBookCollection[]
+
+  @@index([id])
+}
+
+model TranslatedBookCollection {
+  id               String         @id @default(uuid())
+  title            String
+  description      String
+  language         String
+  bookCollectionId String
+  bookCollection   BookCollection @relation(fields: [bookCollectionId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([bookCollectionId, language])
+  @@index([language])
+}
+
+model DynamicPage {
+  id        String             @id @default(uuid())
+  title     String
+  slug      String             @unique
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  blocks    DynamicPageBlock[]
+
+  @@index([id, slug])
+}
+
+model DynamicPageBlock {
+  id       String      @id @default(uuid())
+  pageId   String
+  type     String // "singleBookCollection", "multiCategory", etc
+  viewType String // "grid", "carousel", etc
+  imageUrl String?
+  metadata Json?
+  order    Int
+  data     Json // store collection IDs here, flexible
+  page     DynamicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
