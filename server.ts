@@ -74,30 +74,40 @@ const start = async (): Promise<void> => {
       }
     });
 
-    // Health check endpoint with schema for docs
-    fastify.get('/health', {
-      schema: {
-        tags: ['health'],
-        summary: 'Health check',
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              status: { type: 'string' },
-              timestamp: { type: 'string', format: 'date-time' },
-              service: { type: 'string' }
-            },
-            required: ['status', 'timestamp', 'service']
-          }
-        }
-      }
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
+    // Health check response handler
+    const healthCheckHandler = async (request: FastifyRequest, reply: FastifyReply) => {
       return {
         status: 'OK',
         timestamp: new Date().toISOString(),
         service: 'Nosis API Engine'
       };
-    });
+    };
+
+    // Health check schema for docs
+    const healthCheckSchema = {
+      tags: ['health'],
+      summary: 'Health check',
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' },
+            timestamp: { type: 'string', format: 'date-time' },
+            service: { type: 'string' }
+          },
+          required: ['status', 'timestamp', 'service']
+        }
+      }
+    };
+
+    // Health check endpoints - both root and /health for App Runner compatibility
+    fastify.get('/', {
+      schema: healthCheckSchema
+    }, healthCheckHandler);
+
+    fastify.get('/health', {
+      schema: healthCheckSchema
+    }, healthCheckHandler);
     // Register API routes
     await fastify.register(AuthorRoutes, { prefix: '/api/v1' });
     await fastify.register(BookRoutes, { prefix: '/api/v1' });
