@@ -28,7 +28,7 @@ const start = async (): Promise<void> => {
     const port = process.env.PORT ? parseInt(process.env.PORT) :4000;
     const host = process.env.HOST || 'localhost';
     const corsOptions = {
-      origin: process.env.CORS_ORIGIN || 'https://nosis-admin-nine.vercel.app',
+      origin: process.env.CORS_ORIGIN || 'https://nosis-admin-nine.vercel.app' || 'http://localhost:5173',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true
