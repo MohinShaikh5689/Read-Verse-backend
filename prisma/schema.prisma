@@ -66,8 +66,7 @@ model Author {
 
   translations TranslatedAuthor[]
   Guests       Podcast[]          @relation("Guests")
-  Podcast      Podcast?           @relation(fields: [podcastId], references: [id])
-  podcastId    String?
+  Podcast      Podcast[]          @relation("Speakers")
   Book         Book[]
 
   @@index([id, name])
@@ -219,7 +218,7 @@ model Podcast {
   updatedAt     DateTime            @updatedAt
   categories    Category[]
   translations  TranslatedPodcast[]
-  speakers      Author[]
+  speakers      Author[]            @relation("Speakers")
   guests        Author[]            @relation("Guests")
 
   @@index([title])

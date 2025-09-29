@@ -9,6 +9,7 @@
     "build": "pnpm prisma generate && tsc",
     "start": "node dist/server.js",
     "seed": "tsx scripts/seed.ts",
+    "migrate:firebase": "tsx scripts/migrate-firebase-to-postgresql.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
