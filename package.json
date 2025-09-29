@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch server.ts",
     "dev:ts-node": "ts-node --esm server.ts",
-    "build": "pnpm prisma generate && tsc",
+    "build": "npx prisma generate && tsc",
     "start": "node dist/server.js",
     "seed": "tsx scripts/seed.ts",
     "migrate:firebase": "tsx scripts/migrate-firebase-to-postgresql.js",
