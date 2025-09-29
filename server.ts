@@ -31,6 +31,7 @@ const start = async (): Promise<void> => {
       ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
       : [
         'https://nosis-admin-nine.vercel.app',
+        'https://main.d14juirgqq66w5.amplifyapp.com/',
         'http://localhost:5173'
       ];
 
