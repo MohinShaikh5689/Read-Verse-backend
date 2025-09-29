@@ -67,19 +67,47 @@ export const updateBook = async (id: string, book: Partial<Book>, translatedBook
 
             // Update each translated book by language
             for (const translation of translatedBook) {
-                await prisma.translatedBook.updateMany({
+                // Check if translation exists for this language
+                const existingTranslation = await prisma.translatedBook.findUnique({
                     where: {
-                        bookId: id,
-                        language: translation.language
-                    },
-                    data: {
-                        title: translation.title,
-                        description: translation.description,
-                        published: Boolean(translation.published),
-                        audioEnabled: Boolean(translation.audioEnabled),
-                        coverUrl: translation.coverUrl
-                    },
+                        bookId_language: {
+                            bookId: id,
+                            language: translation.language
+                        }
+                    }
                 });
+
+                if (existingTranslation) {
+                    // Update existing translation
+                    await prisma.translatedBook.update({
+                        where: {
+                            bookId_language: {
+                                bookId: id,
+                                language: translation.language
+                            }
+                        },
+                        data: {
+                            title: translation.title,
+                            description: translation.description,
+                            published: Boolean(translation.published),
+                            audioEnabled: Boolean(translation.audioEnabled),
+                            coverUrl: translation.coverUrl
+                        },
+                    });
+                } else {
+                    // Create new translation if it doesn't exist
+                    await prisma.translatedBook.create({
+                        data: {
+                            bookId: id,
+                            language: translation.language,
+                            title: translation.title,
+                            description: translation.description,
+                            published: Boolean(translation.published),
+                            audioEnabled: Boolean(translation.audioEnabled),
+                            coverUrl: translation.coverUrl
+                        },
+                    });
+                }
             }
 
             // Update summaries if provided
@@ -105,24 +133,24 @@ export const getBooks = async (page: string, language: string): Promise<{ books:
         let books;
         if (language !== 'all') {
             books = await prisma.translatedBook.findMany({
-            skip,
-            take: limit,
-            where: {
-                language: language,
-            },
-            include: {
-                book: {
-                    select: {
-                        totalDuration: true,
-                        authors: {
-                            select: {
-                                id: true,
-                            }
-                        },
-                    }
+                skip,
+                take: limit,
+                where: {
+                    language: language,
                 },
-            }
-        });
+                include: {
+                    book: {
+                        select: {
+                            totalDuration: true,
+                            authors: {
+                                select: {
+                                    id: true,
+                                }
+                            },
+                        }
+                    },
+                }
+            });
         } else {
             books = await prisma.book.findMany({
                 skip,
@@ -234,23 +262,46 @@ export const searchBooks = async (query: string, language: string, page: string)
         const pageNumber = parseInt(page);
         const limit = 10;
         const skip = (pageNumber - 1) * limit;
-        const books = await prisma.translatedBook.findMany({
-            skip,
-            take: limit,
-            where: {
-                language: language,
-                title: {
-                    contains: query,
-                    mode: 'insensitive',
-                }
-            }, select: {
-                title: true,
-                description: true,
-                bookId: true,
-                coverUrl: true,
+        let books;
+        if (language !== 'all') {
+            books = await prisma.translatedBook.findMany({
+                skip,
+                take: limit,
+                where: {
+                    language: language,
+                    title: {
+                        contains: query,
+                        mode: 'insensitive',
+                    }
+                }, select: {
+                    title: true,
+                    description: true,
+                    bookId: true,
+                    coverUrl: true,
 
-            }
-        });
+                }
+            });
+        } else {
+            books = await prisma.book.findMany({
+                skip,
+                take: limit,
+                where: {
+                    title: {
+                        contains: query,
+                        mode: 'insensitive',
+                    }
+                }, include: {
+                    translations: {
+                        select: {
+                            title: true,
+                            description: true,
+                            coverUrl: true,
+                            language: true,
+                        }
+                    }
+                }
+            });
+        }
         return books;
     }
     catch (error: unknown) {
@@ -677,7 +728,7 @@ export const createSummary = async (summary: Summary, translatedSummary: Transla
             timeout: 30000 // Increase timeout to 30 seconds
         });
         return result;
-    }catch(error: unknown){
+    } catch (error: unknown) {
         console.error(error);
         return 'Failed to create summary';
     }
@@ -691,10 +742,36 @@ export const editSummary = async (id: string, summary: Summary, translatedSummar
                 data: summary,
             });
             for (const translation of translatedSummary) {
-                await prisma.translatedSummary.update({
-                    where: { summaryId_language: { summaryId: summaryId, language: translation.language } },
-                    data: translation,
+                // Check if translation exists for this language
+                const existingTranslation = await prisma.translatedSummary.findUnique({
+                    where: {
+                        summaryId_language: {
+                            summaryId: summaryId,
+                            language: translation.language
+                        }
+                    }
                 });
+
+                if (existingTranslation) {
+                    // Update existing translation
+                    await prisma.translatedSummary.update({
+                        where: {
+                            summaryId_language: {
+                                summaryId: summaryId,
+                                language: translation.language
+                            }
+                        },
+                        data: translation,
+                    });
+                } else {
+                    // Create new translation if it doesn't exist
+                    await prisma.translatedSummary.create({
+                        data: {
+                            ...translation,
+                            summaryId: summaryId,
+                        },
+                    });
+                }
             }
             return updatedSummary;
         }, {
@@ -702,7 +779,7 @@ export const editSummary = async (id: string, summary: Summary, translatedSummar
         });
         return result;
     }
-    catch(error: unknown){
+    catch (error: unknown) {
         console.error(error);
         return 'Failed to edit summary';
     }
@@ -712,25 +789,25 @@ export const getSummariesByBookId = async (bookId: string, language: string) => 
     try {
         let summaries
         if (language !== 'all') {
-        summaries = await prisma.summary.findMany({
-            where: { bookId: bookId },
-            include: {
-                TranslatedSummary: {
-                    where: { language: language },
+            summaries = await prisma.summary.findMany({
+                where: { bookId: bookId },
+                include: {
+                    TranslatedSummary: {
+                        where: { language: language },
+                    }
                 }
-            }
-        });
-    }else{
-        summaries = await prisma.summary.findMany({
-            where: { bookId: bookId },
-            include: {
-                TranslatedSummary: true,
-            }
-        });
-    }
+            });
+        } else {
+            summaries = await prisma.summary.findMany({
+                where: { bookId: bookId },
+                include: {
+                    TranslatedSummary: true,
+                }
+            });
+        }
         return summaries;
     }
-    catch(error: unknown){
+    catch (error: unknown) {
         console.error(error);
         return 'Failed to get summaries by book ID';
     }

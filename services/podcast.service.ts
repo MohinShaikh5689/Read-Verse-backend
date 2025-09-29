@@ -35,14 +35,41 @@ export const updatePodcastChannel = async (id: string, podcastChannel: PodcastCh
                 where: { id: id },
                 data: podcastChannel,
             });
+
             for (const translation of translatedPodcast) {
-                await prisma.translatedPodcastCollection.update({
-                    where: { podcastCollectionId_language: { podcastCollectionId: id, language: translation.language } },
-                    data: {
-                        name: translation.name,
-                        description: translation.description,
-                    },
+                // Check if translation exists for this language
+                const existingTranslation = await prisma.translatedPodcastCollection.findUnique({
+                    where: {
+                        podcastCollectionId_language: {
+                            podcastCollectionId: id,
+                            language: translation.language
+                        }
+                    }
                 });
+
+                if (existingTranslation) {
+                    // Update existing translation
+                    await prisma.translatedPodcastCollection.update({
+                        where: {
+                            podcastCollectionId_language: {
+                                podcastCollectionId: id,
+                                language: translation.language
+                            }
+                        },
+                        data: {
+                            name: translation.name,
+                            description: translation.description,
+                        },
+                    });
+                } else {
+                    // Create new translation if it doesn't exist
+                    await prisma.translatedPodcastCollection.create({
+                        data: {
+                            ...translation,
+                            podcastCollectionId: id,
+                        },
+                    });
+                }
             }
             return updatedPodcastChannel;
         }, {
@@ -107,11 +134,38 @@ export const updatePodcast = async (id: string, podcast: Podcast, translatedPodc
                     },
                 },
             });
+
             for (const translation of translatedPodcast) {
-                await prisma.translatedPodcast.update({
-                    where: { podcastId_language: { podcastId: id, language: translation.language } },
-                    data: translation,
+                // Check if translation exists for this language
+                const existingTranslation = await prisma.translatedPodcast.findUnique({
+                    where: {
+                        podcastId_language: {
+                            podcastId: id,
+                            language: translation.language
+                        }
+                    }
                 });
+
+                if (existingTranslation) {
+                    // Update existing translation
+                    await prisma.translatedPodcast.update({
+                        where: {
+                            podcastId_language: {
+                                podcastId: id,
+                                language: translation.language
+                            }
+                        },
+                        data: translation,
+                    });
+                } else {
+                    // Create new translation if it doesn't exist
+                    await prisma.translatedPodcast.create({
+                        data: {
+                            ...translation,
+                            podcastId: id,
+                        },
+                    });
+                }
             }
             return updatedPodcast;
         }, {
