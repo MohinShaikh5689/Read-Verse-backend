@@ -43,13 +43,26 @@ export const updateAuthor = async (id: string, author: Author, translatedAuthor:
             // Update each translatedAuthor individually to avoid type errors with updateMany
             for (const item of translatedAuthor) {
                 console.log("item", item);
-                if (item.id) {
+                 const existingTranslation = await prisma.translatedAuthor.findFirst({
+                    where: {
+                        authorId: id,
+                        language: item.language
+                    }
+                });
+                if (existingTranslation) {
                     await prisma.translatedAuthor.update({
-                        where: { id: item.id },
+                        where: { id: existingTranslation.id },
+                        data: {
+                            name: item.name,
+                            description: item.description,
+                        }
+                    });
+                }else{
+                    await prisma.translatedAuthor.create({
                         data: {
                             ...item,
-                            authorId: updatedAuthor.id,
-                        },
+                            authorId: id,
+                        }
                     });
                 }
             }

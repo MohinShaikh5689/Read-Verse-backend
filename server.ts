@@ -32,7 +32,8 @@ const start = async (): Promise<void> => {
       : [
         'https://nosis-admin-nine.vercel.app',
         'https://main.d14juirgqq66w5.amplifyapp.com',
-        'http://localhost:5173'
+        'http://localhost:5173',
+        'https://admin.nosisapp.com'
       ];
 
     const corsOptions = {
