@@ -850,3 +850,41 @@ export const deleteBookCollectionById = async (id: string) => {
         return 'Failed to delete book collection by ID';
     }
 }
+
+export const getBooksByAuthorIds = async (authorIds: string[], language: string, page: string) => {
+    try {
+        const pageNumber = parseInt(page, 10) || 1;
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const books = await prisma.book.findMany({
+            where: {
+                authors: {
+                    some: {
+                        id: {
+                            in: authorIds,
+                        },
+                    },
+                },
+            },
+            include: {
+                translations: {
+                    where: {
+                        language: language
+                    },
+                    select: {
+                        id: true,
+                        title: true,
+                        coverUrl: true
+                    }
+                }
+            }, 
+            skip, 
+            take: limit,
+        });
+        return books;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get books by author IDs';
+    }
+}

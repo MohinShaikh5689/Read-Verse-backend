@@ -218,3 +218,18 @@ export const deleteAuthorById = async (id: string) => {
         return 'Failed to delete author';
     }
 }
+
+export const getAuthorsByIds = async (ids: string[]) => {
+    try {
+        const authors = await prisma.author.findMany({
+            where: {
+                id: { in: ids },
+            },
+        });
+        return authors;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get authors by ids';
+    }
+
+}

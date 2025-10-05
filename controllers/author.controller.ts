@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
-import { createAuthor, getAuthors, getAuthorById, searchAuthors, updateAuthor, deleteAuthorById } from "../services/author.service.js";
+import { createAuthor, getAuthors, getAuthorById, searchAuthors, updateAuthor, deleteAuthorById, getAuthorsByIds } from "../services/author.service.js";
 import type { Author, TranslatedAuthor } from '../types/author.js';
 dotenv.config();
 
@@ -218,4 +218,13 @@ export const deleteAuthorByIdHandler = asyncHandle(async (request: FastifyReques
     return successHandle({
       message: 'Author deleted successfully',
     }, reply, 200);
-  });
+});
+
+export const getAuthorsByIdsHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+  const { ids } = request.body as { ids: string[] };
+  const authors = await getAuthorsByIds(ids);
+  if (typeof authors === 'string') {
+    return errorHandle(authors, reply, 500);
+  }
+  return successHandle(authors, reply, 200);
+});

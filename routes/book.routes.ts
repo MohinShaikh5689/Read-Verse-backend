@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler, deleteBookSummaryByIdHandler, deleteBookByIdHandler, deleteBookCollectionByIdHandler } from "../controllers/book.controller.js";
+import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler, deleteBookSummaryByIdHandler, deleteBookByIdHandler, deleteBookCollectionByIdHandler, getBooksByAuthorIdsHandler } from "../controllers/book.controller.js";
 
 export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
     // Create book
@@ -307,5 +307,27 @@ export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
         }
     }, deleteBookCollectionByIdHandler);
 
+    // Get books by author ids
+    fastify.post('/books/by-author-ids', {
+        schema: {
+            tags: ['books'],
+            summary: 'Get books by author ids',
+            body: {
+                type: 'object',
+                properties: {
+                    authorIds: { type: 'array', items: { type: 'string' } },
+                },
+                required: ['authorIds']
+            },
+            querystring: {
+                type: 'object',
+                properties: {
+                    language: { type: 'string' },
+                    page: { type: 'string' }
+                },
+                required: ['language', 'page']
+            }
+        }
+    }, getBooksByAuthorIdsHandler);
 };
 

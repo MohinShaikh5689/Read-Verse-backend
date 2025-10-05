@@ -3,7 +3,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
 import type { Book, bookCollectionMetadataFields, BookCollection, Summary, TranslatedSummary } from "../types/books.js";
-import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById } from "../services/book.service.js";
+import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById, getBooksByAuthorIds } from "../services/book.service.js";
 dotenv.config();
 
 export const createBookHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -653,3 +653,15 @@ export const deleteBookByIdHandler = asyncHandle(async (request: FastifyRequest,
     }
     return successHandle(result, reply, 200);
 });
+
+export const getBooksByAuthorIdsHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { authorIds } = request.body as { authorIds: string[] };
+    const { language, page } = request.query as { language: string; page: string };
+    const books = await getBooksByAuthorIds(authorIds, language, page);
+    if (typeof books === 'string') {
+        return errorHandle(books, reply, 500);
+    }
+    return successHandle(books, reply, 200);
+});
+
+
