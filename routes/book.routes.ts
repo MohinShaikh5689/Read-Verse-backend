@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler } from "../controllers/book.controller.js";
+import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler, deleteBookSummaryByIdHandler, deleteBookByIdHandler, deleteBookCollectionByIdHandler } from "../controllers/book.controller.js";
 
 export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
     // Create book
@@ -282,6 +282,30 @@ export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
             }
         }
     }, getBookSummariesByIdHandler);
-    
+
+    // Delete book summary by id
+    fastify.delete('/books/:bookId/summaries/:summaryId', {
+        schema: {
+            tags: ['books'],
+            summary: 'Delete a book summary by id',
+        }
+    }, deleteBookSummaryByIdHandler);
+
+    // Delete book by id
+    fastify.delete('/books/:id', {
+        schema: {
+            tags: ['books'],
+            summary: 'Delete a book by id',
+        }
+    }, deleteBookByIdHandler);
+
+    // Delete book collection by id
+    fastify.delete('/book-collections/:id', {
+        schema: {
+            tags: ['book-collections'],
+            summary: 'Delete a book collection by id',
+        }
+    }, deleteBookCollectionByIdHandler);
+
 };
 

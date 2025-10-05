@@ -1,5 +1,5 @@
 import type{ FastifyInstance } from "fastify";
-import { createAuthorHandler, getAuthorsHandler, getAuthorByIdHandler, searchAuthorsHandler, updateAuthorHandler } from "../controllers/author.controller.js";
+import { createAuthorHandler, getAuthorsHandler, getAuthorByIdHandler, searchAuthorsHandler, updateAuthorHandler, deleteAuthorByIdHandler } from "../controllers/author.controller.js";
 
 export const AuthorRoutes = async (fastify: FastifyInstance): Promise<void> => {
   // Create author
@@ -80,6 +80,13 @@ export const AuthorRoutes = async (fastify: FastifyInstance): Promise<void> => {
       }
     }
   }, searchAuthorsHandler);
-
+  
+  // Delete author by id
+  fastify.delete('/authors/:id', {
+    schema: {
+      tags: ['authors'],
+      summary: 'Delete an author by id',
+    }
+  }, deleteAuthorByIdHandler);
 
 };

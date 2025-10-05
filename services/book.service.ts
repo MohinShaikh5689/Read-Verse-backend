@@ -813,3 +813,40 @@ export const getSummariesByBookId = async (bookId: string, language: string) => 
     }
 }
 
+export const deleteSummaryById = async (id: string) => {
+    try {
+        const result = await prisma.summary.delete({
+            where: { id: id },
+        });
+        return result;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to delete summary by ID';
+    }
+}
+
+export const deleteBookById = async (id: string) => {
+    try {
+        const result = await prisma.book.delete({
+            where: { id: id },
+        });
+        return result;
+    }
+    catch (error: unknown) {
+        console.error(error);
+        return 'Failed to delete book by ID';
+    }
+}
+
+export const deleteBookCollectionById = async (id: string) => {
+    try {
+        const result = await prisma.bookCollection.delete({
+            where: { id: id },
+        });
+        return result;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to delete book collection by ID';
+    }
+}

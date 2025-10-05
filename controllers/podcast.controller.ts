@@ -3,7 +3,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
 import type { PodcastChannel, TranslatedPodcastChannel, Podcast, TranslatedPodcast } from '../types/podcast.js';
-import { createPodcastChannel, createPodcast, getPodcasts, getPodcastsCollections, getPodcastCollectionById, getPodcastById, getPodcastsByCategorySlug, getPodcastsByCategoryIds, searchPodcasts, getPodcastsCollectionsByIds, updatePodcastChannel, updatePodcast } from '../services/podcast.service.js';
+import { createPodcastChannel, createPodcast, getPodcasts, getPodcastsCollections, getPodcastCollectionById, getPodcastById, getPodcastsByCategorySlug, getPodcastsByCategoryIds, searchPodcasts, getPodcastsCollectionsByIds, updatePodcastChannel, updatePodcast, deletePodcastById, deletePodcastCollectionById } from '../services/podcast.service.js';
 dotenv.config();
 
 export const createPodcastChannelHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -505,4 +505,23 @@ export const getPodcastsCollectionsByIdsHandler = asyncHandle(async (request: Fa
     return errorHandle(collections, reply, 500);
   }
   return successHandle(collections, reply, 200);
+});
+
+
+export const deletePodcastByIdHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+  const { id } = request.params as { id: string };
+  const result = await deletePodcastById(id);
+  if (typeof result === 'string') {
+    return errorHandle(result, reply, 500);
+  }
+  return successHandle(result, reply, 200);
+}); 
+
+export const deletePodcastCollectionByIdHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+  const { id } = request.params as { id: string };
+  const result = await deletePodcastCollectionById(id);
+  if (typeof result === 'string') {
+    return errorHandle(result, reply, 500);
+  }
+  return successHandle(result, reply, 200);
 });

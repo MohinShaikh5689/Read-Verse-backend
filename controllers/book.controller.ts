@@ -3,7 +3,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
 import type { Book, bookCollectionMetadataFields, BookCollection, Summary, TranslatedSummary } from "../types/books.js";
-import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId } from "../services/book.service.js";
+import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById } from "../services/book.service.js";
 dotenv.config();
 
 export const createBookHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -625,4 +625,31 @@ export const getBookSummariesByIdHandler = asyncHandle(async (request: FastifyRe
         return errorHandle(summaries, reply, 500);
     }
     return successHandle(summaries, reply, 200);
+});
+
+export const deleteBookSummaryByIdHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { summaryId } = request.params as { summaryId: string };
+    const result = await deleteSummaryById(summaryId);
+    if (typeof result === 'string') {
+        return errorHandle(result, reply, 500);
+    }
+    return successHandle(result, reply, 200);
+});
+
+export const deleteBookCollectionByIdHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { id } = request.params as { id: string };
+    const result = await deleteBookCollectionById(id);
+    if (typeof result === 'string') {
+        return errorHandle(result, reply, 500);
+    }
+    return successHandle(result, reply, 200);
+});
+
+export const deleteBookByIdHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { id } = request.params as { id: string };
+    const result = await deleteBookById(id);
+    if (typeof result === 'string') {
+        return errorHandle(result, reply, 500);
+    }
+    return successHandle(result, reply, 200);
 });

@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createCategoryHandler, getCategoriesHandler, getCategoryByIdHandler, searchCategoriesHandler, getCategoriesByIdsHandler } from "../controllers/categories.controller.js";
+import { createCategoryHandler, getCategoriesHandler, getCategoryByIdHandler, searchCategoriesHandler, getCategoriesByIdsHandler, deleteCategoryByIdHandler, updateCategoryHandler } from "../controllers/categories.controller.js";
 
 export const CategoryRoutes = async (fastify: FastifyInstance) => {
     fastify.post('/categories', {
@@ -36,6 +36,12 @@ export const CategoryRoutes = async (fastify: FastifyInstance) => {
         schema: {
             tags: ['categories'],
             summary: 'Get a category by id',
+            querystring:{
+                type: 'object',
+                properties: {
+                    language: { type: 'string' },
+                },
+            }
         },
     }, getCategoryByIdHandler);
 
@@ -67,5 +73,20 @@ export const CategoryRoutes = async (fastify: FastifyInstance) => {
             },
         },
     }, getCategoriesByIdsHandler);
+
+    fastify.delete('/categories/:id', {
+        schema: {
+            tags: ['categories'],
+            summary: 'Delete a category',
+        },
+    }, deleteCategoryByIdHandler);
+
+    fastify.put('/categories/:id', {
+        schema: {
+            tags: ['categories'],
+            summary: 'Update a category',
+            consumes: ['multipart/form-data'],
+        },
+    }, updateCategoryHandler);
 
 };

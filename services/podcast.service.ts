@@ -527,3 +527,26 @@ export const getPodcastsCollectionsByIds = async (ids: string[]) => {
         return 'Failed to get podcasts collections by IDs';
     }
 }
+
+export const deletePodcastById = async (id: string) => {
+    try {
+        await prisma.podcast.delete({
+            where: { id: id },
+        });
+        return 'Podcast deleted successfully';
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to delete podcast';
+    }
+}
+export const deletePodcastCollectionById = async (id: string) => {
+    try {
+        await prisma.podcastCollection.delete({
+            where: { id: id },
+        });
+        return 'Podcast collection deleted successfully';
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to delete podcast collection';
+    }
+}

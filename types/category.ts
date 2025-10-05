@@ -2,6 +2,7 @@ export interface Category {
     name: string;
     categorySVG: string;
     categoryImage: string;
+    midImage?: string;
     slug: string;
 }
 
@@ -12,5 +13,6 @@ export interface CategoryResponse {
     category: {
         categorySVG: string;
         categoryImage: string;
+        midImage: string;
     }
 }

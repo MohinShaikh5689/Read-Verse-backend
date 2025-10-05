@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createPodcastChannelHandler, createPodcastHandler, getPodcastsHandler, searchPodcastsHandler, getPodcastByIdHandler, getPodcastCollectionByIdHandler, getPodcastsCollectionsHandler, getPodcastsByCategoryIdsHandler, getPodcastsByCategorySlugHandler, getPodcastsCollectionsByIdsHandler, updatePodcastChannelHandler, updatePodcastHandler } from "../controllers/podcast.controller.js";
+import { createPodcastChannelHandler, createPodcastHandler, getPodcastsHandler, searchPodcastsHandler, getPodcastByIdHandler, getPodcastCollectionByIdHandler, getPodcastsCollectionsHandler, getPodcastsByCategoryIdsHandler, getPodcastsByCategorySlugHandler, getPodcastsCollectionsByIdsHandler, updatePodcastChannelHandler, updatePodcastHandler, deletePodcastByIdHandler, deletePodcastCollectionByIdHandler} from "../controllers/podcast.controller.js";
 
 export const PodcastRoutes = async (fastify: FastifyInstance) => {
     fastify.post('/podcast-collections', {
@@ -166,4 +166,19 @@ export const PodcastRoutes = async (fastify: FastifyInstance) => {
             summary: 'Update a podcast',
         },
     }, updatePodcastHandler);
+
+    fastify.delete('/podcasts/:id', {
+        schema: {
+            tags: ['podcast'],
+            summary: 'Delete a podcast',
+        },
+    }, deletePodcastByIdHandler);
+
+    fastify.delete('/podcast-collections/:id', {
+        schema: {
+            tags: ['podcast'],
+            summary: 'Delete a podcast collection',
+        },
+    }, deletePodcastCollectionByIdHandler);
+
 };

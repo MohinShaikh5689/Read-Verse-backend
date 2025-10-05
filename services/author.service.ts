@@ -205,3 +205,16 @@ export const searchAuthors = async (query: string, language: string) => {
         return 'Failed to search authors';
     }
 };
+
+
+export const deleteAuthorById = async (id: string) => {
+    try {
+        await prisma.author.delete({
+            where: { id },
+        });
+        return { message: 'Author deleted successfully' };
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to delete author';
+    }
+}
