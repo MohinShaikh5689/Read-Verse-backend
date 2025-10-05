@@ -11,12 +11,11 @@ export interface TranslatedAuthor {
 }
 
 export interface AuthorResponse {
-    id: string;
+    authorId: string;
     name: string;
     description: string;
     imageUrl: string;
     author:{
-        id: string;
         imageUrl: string;
     }
 }

@@ -91,12 +91,11 @@ export const getAuthors = async (page: string, language: string): Promise<{ auth
                 language: language,
             },
             select: {
-                id: true,
+                authorId: true,
                 name: true,
                 description: true,
                 author: {
                     select: {
-                        id: true,
                         imageUrl: true,
                     }
                 }

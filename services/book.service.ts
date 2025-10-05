@@ -124,7 +124,7 @@ export const updateBook = async (id: string, book: Partial<Book>, translatedBook
     }
 }
 
-export const getBooks = async (page: string, language: string): Promise<{ books: BooksResponse[], page: number, limit: number, total: number } | string> => {
+export const getBooks = async (page: string, language: string)=> {
     try {
         const pageNumber = parseInt(page);
         const limit = 10;
@@ -138,17 +138,24 @@ export const getBooks = async (page: string, language: string): Promise<{ books:
                 where: {
                     language: language,
                 },
-                include: {
+                select:{
+                    bookId: true,
+                    title: true,
+                    description: true,
+                    published: true,
+                    audioEnabled: true,
+                    coverUrl: true,
                     book: {
                         select: {
-                            totalDuration: true,
+                            slug: true,
                             authors: {
                                 select: {
                                     id: true,
-                                }
+                                },
                             },
+                            totalDuration: true
                         }
-                    },
+                    }
                 }
             });
         } else {
@@ -171,7 +178,7 @@ export const getBooks = async (page: string, language: string): Promise<{ books:
         }
 
         return {
-            books: books as BooksResponse[],
+            books: books,
             page: pageNumber,
             limit,
             total: total,
@@ -203,6 +210,7 @@ export const getBookById = async (id: string, language: string) => {
                     audioEnabled: true,
                     book: {
                         select: {
+                            slug: true,
                             authors: {
                                 select: {
                                     id: true,

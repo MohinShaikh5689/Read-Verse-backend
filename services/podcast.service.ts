@@ -234,27 +234,32 @@ export const getPodcastById = async (id: string, language: string) => {
                 language: language,
                 podcastId: id,
             },
-            include: {
-                podcast: {
-                    include: {
-                        categories: {
-                            select: {
-                                id: true,
-                            }
-                        },
+             select:{
+                podcastId: true,
+                title: true,
+                description: true,
+                podcast:{
+                    select:{
+                        imageUrl: true,
+                        totalDuration: true,
                         speakers: {
                             select: {
                                 id: true,
                             }
                         },
-                        guests:{
+                        guests: {
                             select: {
                                 id: true,
                             }
-                        }
-                    },
-                },
-                },
+                        },
+                        categories: {
+                            select: {
+                                id: true,
+                            }
+                        },
+                    }
+                }
+             }
             });
         } else {
             podcast = await prisma.podcast.findUnique({
@@ -549,4 +554,24 @@ export const deletePodcastCollectionById = async (id: string) => {
         console.error(error);
         return 'Failed to delete podcast collection';
     }
+}
+
+export const getPodcastSummary = async (podcastId: string, language: string) => {
+    try {
+        const podcastSummary = await prisma.translatedPodcast.findFirst({
+            where: {
+                podcastId: podcastId,
+                language: language,
+            },
+            select: {
+                summary: true,
+                keyTakeaways: true,
+            }
+        });
+        return podcastSummary;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get podcast summary';
+    }
+
 }

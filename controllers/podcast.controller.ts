@@ -3,7 +3,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
 import type { PodcastChannel, TranslatedPodcastChannel, Podcast, TranslatedPodcast } from '../types/podcast.js';
-import { createPodcastChannel, createPodcast, getPodcasts, getPodcastsCollections, getPodcastCollectionById, getPodcastById, getPodcastsByCategorySlug, getPodcastsByCategoryIds, searchPodcasts, getPodcastsCollectionsByIds, updatePodcastChannel, updatePodcast, deletePodcastById, deletePodcastCollectionById } from '../services/podcast.service.js';
+import { createPodcastChannel, createPodcast, getPodcasts, getPodcastsCollections, getPodcastCollectionById, getPodcastById, getPodcastsByCategorySlug, getPodcastsByCategoryIds, searchPodcasts, getPodcastsCollectionsByIds, updatePodcastChannel, updatePodcast, deletePodcastById, deletePodcastCollectionById, getPodcastSummary } from '../services/podcast.service.js';
 dotenv.config();
 
 export const createPodcastChannelHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -524,4 +524,14 @@ export const deletePodcastCollectionByIdHandler = asyncHandle(async (request: Fa
     return errorHandle(result, reply, 500);
   }
   return successHandle(result, reply, 200);
+});
+
+export const getPodcastSummaryHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+  const { id } = request.params as { id: string };
+  const { language } = request.query as { language: string };
+  const summary = await getPodcastSummary(id, language);
+  if (typeof summary === 'string') {
+    return errorHandle(summary, reply, 500);
+  }
+  return successHandle(summary, reply, 200);
 });

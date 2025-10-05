@@ -74,7 +74,7 @@ export const getUsersHandler = asyncHandle(async (request: FastifyRequest, reply
 });
 
 export const deleteUserHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    const { id } = request.params as { id: string };
+    const id = (request as any).user.uid;
     const result = await deleteUser(id);
     if (result !== 'User deleted successfully') {
         return errorHandle(result, reply, 500);
@@ -127,8 +127,9 @@ export const updateUserProgressHandler = asyncHandle(async (request: FastifyRequ
 
 // Bookmark handlers
 export const createBookmarkHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    const bookmarkData = request.body as any;
+    const { id } = request.params as { id: string };
     const userId = (request as any).user.uid;
+    const bookmarkData = { bookId: id, userId };
     const bookmark = await createBookmark(bookmarkData, userId);
     if (typeof bookmark === 'string') {
         return errorHandle(bookmark, reply, 500);
