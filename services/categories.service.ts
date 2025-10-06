@@ -133,10 +133,13 @@ export const getCategoryById = async (id: string, language: string) => {
                     language: language,
                     categoryId: id,
                 },
-                include: {
+                select:{
+                    categoryId: true,
+                    name: true,
+                    description: true,
+                    language: true,
                     category: {
                         select: {
-                            id: true,
                             categorySVG: true,
                             categoryImage: true,
                             midImage: true,

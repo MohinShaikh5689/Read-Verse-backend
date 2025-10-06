@@ -14,7 +14,8 @@ import {
     createBookmarkHandler,
     deleteBookmarkHandler,
     getUserBookmarksHandler,
-    getMeHandler
+    getMeHandler,
+    generateTestTokenHandler
 } from "../controllers/user.controller.js";
 
 export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
@@ -265,4 +266,21 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
             }
         }
     }, getUserBookmarksHandler);
+
+    // Generate test token (Development only)
+    fastify.post('/users/token', {
+        schema: {
+            tags: ['users'],
+            summary: 'Generate a test token for a user (Development only)',
+            body: {
+                type: 'object',
+                properties: {
+                    email: { type: 'string', format: 'email' }
+                },
+                required: ['email']
+            }
+        }
+    }, generateTestTokenHandler);
+
 };
+

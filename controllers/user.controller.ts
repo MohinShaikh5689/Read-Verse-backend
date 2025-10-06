@@ -15,7 +15,8 @@ import {
     createBookmark,
     deleteBookmark,
     getUserBookmarks,
-    getMe
+    getMe,
+    generateTestToken
 } from '../services/user.service.js';
 
 export const createUserHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -155,3 +156,31 @@ export const getUserBookmarksHandler = asyncHandle(async (request: FastifyReques
     }
     return successHandle(bookmarks, reply, 200);
 });
+
+// Token Generation for Testing (Development Only)
+export const generateTestTokenHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { email } = request.body as { email: string };
+    
+    if (!email) {
+        return errorHandle('Email is required', reply, 400);
+    }
+
+    const result = await generateTestToken(email);
+    
+    if (typeof result === 'string') {
+        return errorHandle(result, reply, 404);
+    }
+
+    return successHandle({
+        message: '🎫 Token generated successfully for development testing',
+        token: result.customToken,
+        uid: result.uid,
+        email: result.email,
+        instructions: {
+            swagger: 'Use this token in Swagger UI by clicking "Authorize" button and pasting it in the "Value" field',
+            curl: `curl -X GET http://localhost:3000/api/auth/profile -H "Authorization: Bearer ${result.customToken}"`,
+            note: '⚠️ This is for DEVELOPMENT testing only. In production, apps get ID tokens after user login.'
+        }
+    }, reply, 200);
+});
+

@@ -380,3 +380,34 @@ export const getUserBookmarks = async (userId: string, page: string): Promise<{ 
         return 'Failed to get user bookmarks';
     }
 };
+
+// Token Generation for Development/Testing
+export const generateTestToken = async (email: string): Promise<{ customToken: string; uid: string; email: string } | string> => {
+    try {
+        // Lazy import to avoid blocking server startup
+        const { auth } = await import("../utils/firebase-admin.js");
+        
+        // Get Firebase Auth user by email
+        const firebaseUser = await auth.getUserByEmail(email);
+        
+        if (!firebaseUser) {
+            return 'User not found with this email';
+        }
+
+        // Create a custom token (development only)
+        const customToken = await auth.createCustomToken(firebaseUser.uid);
+
+        return {
+            customToken,
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || email,
+        };
+    } catch (error: any) {
+        if (error.code === 'auth/user-not-found') {
+            return 'User not found with this email. Please create the user in Firebase Auth first.';
+        }
+        console.error('Error generating token:', error);
+        return 'Failed to generate token';
+    }
+};
+
