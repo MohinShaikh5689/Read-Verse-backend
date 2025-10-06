@@ -491,7 +491,8 @@ export const getPodcastsByCategoryIdsHandler = asyncHandle(async (request: Fasti
 export const searchPodcastsHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
   const { query } = request.query as { query: string };
   const { language } = request.query as { language: string };
-  const podcasts = await searchPodcasts(query, language);
+  const { page } = request.query as { page: string };
+  const podcasts = await searchPodcasts(query, language, page);
   if (typeof podcasts === 'string') {
     return errorHandle(podcasts, reply, 500);
   }

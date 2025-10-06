@@ -492,9 +492,15 @@ export const getPodcastsByCategoryIds = async (categoryIds: string[], page: stri
     };
 }
 
-export const searchPodcasts = async (query: string, language: string) => {
+export const searchPodcasts = async (query: string, language: string, page: string) => {
     try {
-        const podcasts = await prisma.translatedPodcast.findMany({
+        const pageNumber = parseInt(page) || 1;
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+        let podcasts;
+        if (language !== 'all') {
+
+        podcasts = await prisma.translatedPodcast.findMany({
             where: {
                 language: language,
                 title: {
@@ -509,8 +515,26 @@ export const searchPodcasts = async (query: string, language: string) => {
                         totalDuration: true,
                     }
                 }
-            }
+            },
+            skip,
+            take: limit,
         });
+    }   else {
+        podcasts = await prisma.podcast.findMany({
+            where: {
+                title: {
+                    contains: query,
+                    mode: 'insensitive',
+                }
+            },
+            include: {
+                translations: true
+            },
+           
+            skip,
+            take: limit,
+        });
+    }
         return podcasts;
     } catch (error: unknown) {
         console.error(error);

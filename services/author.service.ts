@@ -179,7 +179,9 @@ export const getAuthorById = async (id: string, language: string) => {
 
 export const searchAuthors = async (query: string, language: string) => {
     try {
-        const authors = await prisma.translatedAuthor.findMany({
+        let authors;
+        if (language !== 'all') {
+            authors = await prisma.translatedAuthor.findMany({
             where: {
                 language: language,
                 name: {
@@ -198,6 +200,19 @@ export const searchAuthors = async (query: string, language: string) => {
                 }
             }
         });
+    }else {
+        authors = await prisma.author.findMany({
+            where: {
+                name: {
+                    contains: query,
+                    mode: 'insensitive',
+                }
+            },
+            include:{
+                translations: true
+            }
+        })
+    }
         return authors;
     } catch (error: unknown) {
         console.error(error);

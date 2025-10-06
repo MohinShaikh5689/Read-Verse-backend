@@ -42,8 +42,9 @@ export const PodcastRoutes = async (fastify: FastifyInstance) => {
                 properties: {
                     query: { type: 'string' },
                     language: { type: 'string' },
+                    page: { type: 'string' },
                 },
-                required: ['query', 'language'],
+                required: ['query', 'language', 'page'],
             }
         },
     }, searchPodcastsHandler);
