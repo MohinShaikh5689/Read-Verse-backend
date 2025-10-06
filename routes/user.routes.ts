@@ -245,19 +245,12 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
         }
     }, deleteBookmarkHandler);
 
-    fastify.get('/users/:userId/bookmarks', {
+    fastify.get('/users/bookmarks', {
         preHandler: authGuard,
         schema: {
             tags: ['bookmarks'],
             summary: 'Get user bookmarks',
             security: [{ bearerAuth: [] }],
-            params: {
-                type: 'object',
-                properties: {
-                    userId: { type: 'string' }
-                },
-                required: ['userId']
-            },
             querystring: {
                 type: 'object',
                 properties: {
