@@ -24,8 +24,8 @@ model User {
 
 model userPreferences {
   id                  String         @id @default(uuid())
-  allowRemainders     Boolean        @default(true)
-  appLangauge         String         @default("en")
+  allowReminders      Boolean        @default(true)
+  appLanguage         String         @default("en")
   authorPreferences   String[]       @default([])
   categoryPreferences String[]       @default([])
   bookPreferences     String[]       @default([])

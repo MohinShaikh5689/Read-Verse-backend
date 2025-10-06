@@ -29,7 +29,6 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
             body: {
                 type: 'object',
                 properties: {
-                    id: { type: 'string' },
                     name: { type: 'string' },
                     email: { type: 'string', format: 'email' },
                     gender: { type: 'string' },
@@ -141,8 +140,8 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
             body: {
                 type: 'object',
                 properties: {
-                    allowRemainders: { type: 'boolean' },
-                    appLangauge: { type: 'string' },
+                    allowReminders: { type: 'boolean' },
+                    appLanguage: { type: 'string' },
                     authorPreferences: { type: 'array', items: { type: 'string' } },
                     categoryPreferences: { type: 'array', items: { type: 'string' } },
                     bookPreferences: { type: 'array', items: { type: 'string' } }

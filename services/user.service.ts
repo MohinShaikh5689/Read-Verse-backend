@@ -3,11 +3,14 @@ import type { User, UserResponse, UserPreferences, UserProgress, BookMark } from
 
 const prisma = new PrismaClient();
 
-export const createUser = async (user: User): Promise<Partial<User> | string> => {
+export const createUser = async (user: User, id: string): Promise<Partial<User> | string> => {
     try {
         const result = await prisma.$transaction(async (prisma) => {
             const newUser = await prisma.user.create({
-                data: user,
+                data: {
+                    ...user,
+                    id
+                },
             });
             return newUser;
         }, {

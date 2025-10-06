@@ -1,5 +1,4 @@
 export interface User {
-    id: string;
     name: string;
     email: string;
     gender: string | null;
@@ -23,8 +22,8 @@ export interface UserResponse {
 
 export interface UserPreferences {
     id: string;
-    allowRemainders: boolean;
-    appLangauge: string;
+    allowReminders: boolean;
+    appLanguage: string;
     authorPreferences: string[];
     categoryPreferences: string[];
     userId: string;

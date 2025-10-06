@@ -21,7 +21,8 @@ import {
 
 export const createUserHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     const userData = request.body as User;
-    const user = await createUser(userData);
+    const userId = (request as any).user.uid;
+    const user = await createUser(userData, userId);
     if (typeof user === 'string') {
         return errorHandle(user, reply, 500);
     }
