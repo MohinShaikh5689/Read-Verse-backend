@@ -661,8 +661,8 @@ async function seedUsers() {
         dob: userData.dob,
         userPreferences: {
           create: {
-            allowRemainders: true,
-            appLangauge: 'en',
+            allowReminders: true,
+            appLanguage: 'en',
             authorPreferences: ['author-1', 'author-2'],
             categoryPreferences: ['cat-1', 'cat-3']
           }
