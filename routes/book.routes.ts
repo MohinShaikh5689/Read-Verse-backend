@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler, deleteBookSummaryByIdHandler, deleteBookByIdHandler, deleteBookCollectionByIdHandler, getBooksByAuthorIdsHandler, createFreeBooksHandler, getFreeBooksHandler, deleteFreeBooksByIdHandler } from "../controllers/book.controller.js";
+import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler, deleteBookSummaryByIdHandler, deleteBookByIdHandler, deleteBookCollectionByIdHandler, getBooksByAuthorIdsHandler, createFreeBooksHandler, getFreeBooksHandler, deleteFreeBooksByIdHandler, getSummaryByIdHandler } from "../controllers/book.controller.js";
 
 export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
     // Create book
@@ -360,6 +360,28 @@ export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
             summary: 'Delete free books by id',
         }
     }, deleteFreeBooksByIdHandler);
+
+    // Get summary by id
+    fastify.get('/summaries/:id', {
+        schema: {
+            tags: ['books'],
+            summary: 'Get summary by id',
+            params: {
+                type: 'object',
+                properties: {
+                    id: { type: 'string' }
+                },
+                required: ['id']
+            },
+            querystring: {
+                type: 'object',
+                properties: {
+                    language: { type: 'string' }
+                },
+                required: ['language']
+            }
+        }
+    }, getSummaryByIdHandler);
 };
 
 

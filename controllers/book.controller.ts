@@ -3,7 +3,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
 import type { Book, bookCollectionMetadataFields, BookCollection, Summary, TranslatedSummary, FreeBooks } from "../types/books.js";
-import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById, getBooksByAuthorIds, CreateFreeBooks, getFreeBooks, deleteFreeBooksById } from "../services/book.service.js";
+import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById, getBooksByAuthorIds, CreateFreeBooks, getFreeBooks, deleteFreeBooksById, getSummaryById } from "../services/book.service.js";
 dotenv.config();
 
 export const createBookHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -691,4 +691,14 @@ export const deleteFreeBooksByIdHandler = asyncHandle(async (request: FastifyReq
         return errorHandle(result, reply, 500);
     }
     return successHandle(result, reply, 200);
+});
+
+export const getSummaryByIdHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { id } = request.params as { id: string };
+    const { language } = request.query as { language: string };
+    const summary = await getSummaryById(id, language);
+    if (typeof summary === 'string') {
+        return errorHandle(summary, reply, 500);
+    }
+    return successHandle(summary, reply, 200);
 });

@@ -222,8 +222,24 @@ export const getBookById = async (id: string, language: string) => {
                                     id: true,
                                 },
                             },
+                            summaries:{
+                                where: { TranslatedSummary: { some: { language: language } } },
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    order: true,
+                                    TranslatedSummary: {
+                                        where: { language: language },
+                                        select: {
+                                            title: true,
+                                            language: true,
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    }
+                        
+                    },
                 }
             });
         } else {
@@ -438,7 +454,11 @@ export const getBookCollectionById = async (id: string, language: string, includ
                     bookCollectionId: id,
                     language: language
                 },
-                include: {
+                select:{
+                    bookCollectionId: true,
+                    title: true,
+                    description: true,
+                    language: true,
                     bookCollection: {
                         select: {
                             id: true,
@@ -795,9 +815,18 @@ export const getSummariesByBookId = async (bookId: string, language: string) => 
         if (language !== 'all') {
             summaries = await prisma.summary.findMany({
                 where: { bookId: bookId },
-                include: {
-                    TranslatedSummary: {
+                select:{
+                    id: true,
+                    title: true,
+                    order: true,
+                     TranslatedSummary: {
                         where: { language: language },
+                        select:{
+                            title: true,
+                            content: true,
+                            keyTakeaways: true,
+                            language: true,
+                        }
                     }
                 }
             });
@@ -953,5 +982,27 @@ export const getFreeBooks = async (language: string) => {
     } catch (error: unknown) {
         console.error(error);
         return 'Failed to get free books';
+    }
+}
+
+export const getSummaryById = async (id: string, language: string) => {
+    try {
+        const summary = await prisma.translatedSummary.findFirst({
+            where: {
+                summaryId: id,
+                language: language
+            },
+            select: {
+                title: true,
+                content: true,
+                keyTakeaways: true,
+                language: true,
+                audioUrl: true,
+            }
+        });
+        return summary;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get summary by ID';
     }
 }

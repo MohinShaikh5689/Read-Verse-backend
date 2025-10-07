@@ -24,6 +24,8 @@ export const createUser = async (user: User, id: string): Promise<Partial<User> 
 };
 
 export const getMe = async (userId: string): Promise<any | string> => {
+    console.log("Entered getMe");
+    console.log("userId", userId);
     try {
         const user = await prisma.user.findUnique({
             where: { id: userId },
