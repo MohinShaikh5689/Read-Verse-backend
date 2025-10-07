@@ -35,7 +35,7 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
                     profilePicture: { type: 'string' },
                     dob: { type: 'string' }
                 },
-                required: ['id', 'name', 'email', 'gender', 'profilePicture', 'dob']
+                required: ['name', 'email']
             }
         }
     }, createUserHandler);

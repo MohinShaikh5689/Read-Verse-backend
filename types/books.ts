@@ -49,3 +49,8 @@ export interface TranslatedSummary {
   content: string;
   keyTakeaways: string[];
 }
+
+export interface FreeBooks {
+  BookId: string;
+  order: number;
+}

@@ -344,12 +344,16 @@ export const getPodcastCollectionById = async (id: string, language: string, inc
                     language: language,
                     podcastCollectionId: id,
                 },
-                include: {
+                select: {
+                    podcastCollectionId: true,
+                    name: true,
+                    description: true,
+                    language: true,
                     podcastCollection: {
                         select: {
-                            podcastsIds: true,
                             imageUrl: true,
                             slug: true,
+                            podcastsIds: true,
                         }
                     }
                 }

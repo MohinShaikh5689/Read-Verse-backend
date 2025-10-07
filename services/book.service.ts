@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import type { Book, BooksResponse, BookCollection, bookCollectionMetadataFields, Summary, TranslatedSummary } from "../types/books.js";
+import type { Book, BookCollection, bookCollectionMetadataFields, Summary, TranslatedSummary, FreeBooks } from "../types/books.js";
 const prisma = new PrismaClient();
 
 export const createBook = async (book: Book, translatedBook: any[]): Promise<Partial<Book> | string> => {
@@ -124,7 +124,7 @@ export const updateBook = async (id: string, book: Partial<Book>, translatedBook
     }
 }
 
-export const getBooks = async (page: string, language: string)=> {
+export const getBooks = async (page: string, language: string) => {
     try {
         const pageNumber = parseInt(page);
         const limit = 10;
@@ -138,7 +138,7 @@ export const getBooks = async (page: string, language: string)=> {
                 where: {
                     language: language,
                 },
-                select:{
+                select: {
                     bookId: true,
                     title: true,
                     description: true,
@@ -488,11 +488,7 @@ const getBooksByIds = async (ids: string[], language: string) => {
                 book: {
                     select: {
                         authors: {
-                            select: {
-                                translations: {
-                                    where: { language: language }
-                                }
-                            }
+                            select: { id: true }
                         }
                     }
                 }
@@ -886,13 +882,76 @@ export const getBooksByAuthorIds = async (authorIds: string[], language: string,
                         coverUrl: true
                     }
                 }
-            }, 
-            skip, 
+            },
+            skip,
             take: limit,
         });
         return books;
     } catch (error: unknown) {
         console.error(error);
         return 'Failed to get books by author IDs';
+    }
+}
+
+export const CreateFreeBooks = async (books: FreeBooks[]) => {
+    try {
+        const result = await prisma.freeBooks.createMany({
+            data: books.map(book => ({
+                bookId: book.BookId,
+                order: book.order
+            })),
+            skipDuplicates: true,
+        });
+        return result;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to create free books';
+    }
+}
+
+export const deleteFreeBooksById = async (bookId: string) => {
+    try {
+        const result = await prisma.freeBooks.delete({
+            where: { bookId: bookId },
+        });
+        return result;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to delete free books by ID';
+    }
+}
+
+
+export const getFreeBooks = async (language: string) => {
+    console.log("language", language);
+    try {
+        const freeBooks = await prisma.freeBooks.findMany({
+            include: {
+                book: {
+                    select:{
+                        slug: true, 
+                        translations: {
+                            where: {
+                                language: language
+                            },
+                            select: {
+                                title: true,
+                                coverUrl: true
+
+                            }
+                        },
+                        authors: {
+                            select: {
+                                id: true,
+                            }
+                        },
+                    }
+                }
+            }
+        });
+        return freeBooks;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get free books';
     }
 }

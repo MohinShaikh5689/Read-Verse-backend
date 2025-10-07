@@ -233,12 +233,28 @@ export const deleteAuthorById = async (id: string) => {
     }
 }
 
-export const getAuthorsByIds = async (ids: string[]) => {
+export const getAuthorsByIds = async (ids: string[], language: string) => {
+    console.log("ids", ids);
+    console.log("language", language);
     try {
-        const authors = await prisma.author.findMany({
+        const authors = await prisma.translatedAuthor.findMany({
             where: {
-                id: { in: ids },
+                authorId: {
+                    in: ids,
+                },
+                language: language,
             },
+            select: {
+                authorId: true,
+                name: true,
+                description: true,
+                language: true,
+                author: {
+                    select: {
+                        imageUrl: true,
+                    }
+                }
+            }
         });
         return authors;
     } catch (error: unknown) {

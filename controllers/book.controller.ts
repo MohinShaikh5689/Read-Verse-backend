@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
-import type { Book, bookCollectionMetadataFields, BookCollection, Summary, TranslatedSummary } from "../types/books.js";
-import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById, getBooksByAuthorIds } from "../services/book.service.js";
+import type { Book, bookCollectionMetadataFields, BookCollection, Summary, TranslatedSummary, FreeBooks } from "../types/books.js";
+import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById, getBooksByAuthorIds, CreateFreeBooks, getFreeBooks, deleteFreeBooksById } from "../services/book.service.js";
 dotenv.config();
 
 export const createBookHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -665,3 +665,30 @@ export const getBooksByAuthorIdsHandler = asyncHandle(async (request: FastifyReq
 });
 
 
+export const createFreeBooksHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const data = request.body as FreeBooks[];
+    const freeBooks = await CreateFreeBooks(data);
+    if (typeof freeBooks === 'string') {
+        return errorHandle(freeBooks, reply, 500);
+    }
+    return successHandle(freeBooks, reply, 200);
+});
+
+export const getFreeBooksHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { language } = request.query as { language: string };
+    console.log("language", language);
+    const freeBooks = await getFreeBooks(language);
+    if (typeof freeBooks === 'string') {
+        return errorHandle(freeBooks, reply, 500);
+    }
+    return successHandle(freeBooks, reply, 200);
+});
+
+export const deleteFreeBooksByIdHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { id } = request.params as { id: string };
+    const result = await deleteFreeBooksById(id);
+    if (typeof result === 'string') {
+        return errorHandle(result, reply, 500);
+    }
+    return successHandle(result, reply, 200);
+});

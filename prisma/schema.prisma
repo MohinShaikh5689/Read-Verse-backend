@@ -23,14 +23,14 @@ model User {
 }
 
 model userPreferences {
-  id                  String         @id @default(uuid())
-  allowReminders      Boolean        @default(true)
-  appLanguage         String         @default("en")
-  authorPreferences   String[]       @default([])
-  categoryPreferences String[]       @default([])
-  bookPreferences     String[]       @default([])
-  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId              String         @unique
+  id                  String   @id @default(uuid())
+  allowReminders      Boolean  @default(true)
+  appLanguage         String   @default("en")
+  authorPreferences   String[] @default([])
+  categoryPreferences String[] @default([])
+  bookPreferences     String[] @default([])
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String   @unique
 }
 
 model userProgress {
@@ -41,8 +41,8 @@ model userProgress {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  book              Book             @relation(fields: [bookId], references: [id])
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([bookId, userId])
 }
@@ -51,7 +51,7 @@ model BookMark {
   id        String   @id @default(uuid())
   bookId    String
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   book      Book     @relation(fields: [bookId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -96,10 +96,11 @@ model Book {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  categories       Category[]
-  summaries        Summary[]
-  userProgress     userProgress[]
-  BookMark         BookMark[]
+  categories   Category[]
+  summaries    Summary[]
+  userProgress userProgress[]
+  BookMark     BookMark[]
+  FreeBooks    FreeBooks?
 
   @@index([id, title, slug])
 }
@@ -288,4 +289,14 @@ model DynamicPageBlock {
   order    Int
   data     Json // store collection IDs here, flexible
   page     DynamicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+model FreeBooks {
+  bookId    String @id
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bookId])
 }

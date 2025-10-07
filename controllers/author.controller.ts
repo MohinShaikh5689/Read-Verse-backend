@@ -222,7 +222,8 @@ export const deleteAuthorByIdHandler = asyncHandle(async (request: FastifyReques
 
 export const getAuthorsByIdsHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
   const { ids } = request.body as { ids: string[] };
-  const authors = await getAuthorsByIds(ids);
+  const { language } = request.query as { language: string };
+  const authors = await getAuthorsByIds(ids, language);
   if (typeof authors === 'string') {
     return errorHandle(authors, reply, 500);
   }

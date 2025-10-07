@@ -172,10 +172,13 @@ export const searchCategories = async (query: string, language: string) => {
                     mode: 'insensitive',
                 }
             },
-            include: {
+            select:{
+                categoryId: true,
+                name: true,
+                description: true,
+                language: true,
                 category: {
                     select: {
-                        id: true,
                         categorySVG: true,
                         categoryImage: true,
                         midImage: true,

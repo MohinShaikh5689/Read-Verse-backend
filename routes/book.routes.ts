@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler, deleteBookSummaryByIdHandler, deleteBookByIdHandler, deleteBookCollectionByIdHandler, getBooksByAuthorIdsHandler } from "../controllers/book.controller.js";
+import { createBookHandler, getBooksHandler, getBookByIdHandler, searchBooksHandler, createBookCollectionHandler, getBookCollectionByIdHandler, getBookCollectionsHandler, EditBookHandler, getBookBySlugHandler, getBooksByAuthorIdHandler, getBooksByCategoryIdsHandler, getBooksByCategorySlugHandler, getBookCollectionsByIdsHandler, updateBookCollectionHandler, createBookSummaryHandler, editBookSummaryHandler, getBookSummariesByIdHandler, deleteBookSummaryByIdHandler, deleteBookByIdHandler, deleteBookCollectionByIdHandler, getBooksByAuthorIdsHandler, createFreeBooksHandler, getFreeBooksHandler, deleteFreeBooksByIdHandler } from "../controllers/book.controller.js";
 
 export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
     // Create book
@@ -329,5 +329,37 @@ export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
             }
         }
     }, getBooksByAuthorIdsHandler);
+
+    // Create free books
+    fastify.post('/books/free', {
+        schema: {
+            tags: ['books'],
+            summary: 'Create free books',
+        }
+    }, createFreeBooksHandler);
+
+    // Get free books
+    fastify.get('/books/free', {
+        schema: {
+            tags: ['books'],
+            summary: 'Get free books',
+            querystring: {
+                type: 'object',
+                properties: {
+                    language: { type: 'string' },
+                },
+                required: ['language']
+            }
+        }
+    }, getFreeBooksHandler);
+
+    // Delete free books by id
+    fastify.delete('/books/free/:id', {
+        schema: {
+            tags: ['books'],
+            summary: 'Delete free books by id',
+        }
+    }, deleteFreeBooksByIdHandler);
 };
+
 
