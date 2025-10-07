@@ -512,9 +512,11 @@ export const searchPodcasts = async (query: string, language: string, page: stri
                     mode: 'insensitive',
                 }
             },
-            include: {
-                podcast: {
-                    select: {
+            select:{
+                podcastId: true,
+                title: true,
+                podcast:{
+                    select:{
                         imageUrl: true,
                         totalDuration: true,
                     }

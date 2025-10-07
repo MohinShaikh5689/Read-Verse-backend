@@ -237,17 +237,32 @@ export const deleteUser = async (id: string): Promise<string> => {
 export const createUserPreferences = async (preferences: Omit<UserPreferences, 'id'>, userId: string): Promise<UserPreferences | string> => {
     try {
         const result = await prisma.$transaction(async (prisma) => {
-            const newPreferences = await prisma.userPreferences.create({
-                data: { ...preferences, userId: userId },
+            // Check if preferences already exist for this user
+            const existingPreferences = await prisma.userPreferences.findUnique({
+                where: { userId: userId },
             });
-            return newPreferences;
+
+            if (existingPreferences) {
+                // Update existing preferences
+                const updatedPreferences = await prisma.userPreferences.update({
+                    where: { userId: userId },
+                    data: preferences,
+                });
+                return updatedPreferences;
+            } else {
+                // Create new preferences
+                const newPreferences = await prisma.userPreferences.create({
+                    data: { ...preferences, userId: userId },
+                });
+                return newPreferences;
+            }
         }, {
             timeout: 30000 // Increase timeout to 30 seconds
         });
         return result;
     } catch (error: unknown) {
         console.error(error);
-        return 'Failed to create user preferences';
+        return 'Failed to create or update user preferences';
     }
 };
 
