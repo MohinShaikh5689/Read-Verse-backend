@@ -193,9 +193,9 @@ export const getPodcasts = async (page: string, language: string) => {
         select: {
             podcastId: true,
             title: true,
+            imageUrl: true,
             podcast: {
                 select: {
-                    imageUrl: true,
                     totalDuration: true,
                 }
             }
@@ -212,6 +212,7 @@ export const getPodcasts = async (page: string, language: string) => {
                     select: {
                         title: true,
                         language: true,
+                        imageUrl: true,
                     }
                 }
             }
@@ -238,9 +239,9 @@ export const getPodcastById = async (id: string, language: string) => {
                 podcastId: true,
                 title: true,
                 description: true,
+                imageUrl: true,
                 podcast:{
                     select:{
-                        imageUrl: true,
                         totalDuration: true,
                         speakers: {
                             select: {
@@ -284,6 +285,7 @@ export const getPodcastById = async (id: string, language: string) => {
                         select: {
                             title: true,
                             language: true,
+                            imageUrl: true,
                             description: true,
                             summary: true,
                             keyTakeaways: true,
@@ -391,12 +393,20 @@ const getPodcastsByIds = async (ids: string[], language: string) => {
                 id: {
                     in: ids,
                 },
-                translations: {
-                    some: {
-                        language: language,
-                    },
-                },
             },
+            select:{
+                id: true,
+                totalDuration: true,
+                published: true,
+                translations: {
+                    where: { language: language },
+                    select: {
+                        title: true,
+                        imageUrl: true,
+                        language: true,
+                    }
+                },
+            }
         });
         return podcasts;
     } catch (error: unknown) {
@@ -476,12 +486,12 @@ export const getPodcastsByCategoryIds = async (categoryIds: string[], page: stri
         },
         select: {
             id: true,
-            imageUrl: true,
             totalDuration: true,
             translations: {
                 where: { language: language },
                 select: {
                     title: true,
+                    imageUrl: true,
                 }
             },
         },
@@ -515,9 +525,9 @@ export const searchPodcasts = async (query: string, language: string, page: stri
             select:{
                 podcastId: true,
                 title: true,
+                imageUrl: true,
                 podcast:{
                     select:{
-                        imageUrl: true,
                         totalDuration: true,
                     }
                 }

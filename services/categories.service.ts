@@ -143,6 +143,7 @@ export const getCategoryById = async (id: string, language: string) => {
                             categorySVG: true,
                             categoryImage: true,
                             midImage: true,
+                            slug: true,
                         }
                     }
                 }

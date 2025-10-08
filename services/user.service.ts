@@ -56,7 +56,13 @@ export const getMe = async (userId: string): Promise<any | string> => {
         if (!user) {
             return 'User not found';
         }
-        return user;
+        // Convert userPreferences array to single object since it's a one-to-one relation
+        const { BookMark, userPreferences, ...rest } = user;
+        return {
+            ...rest,
+            userPreferences: userPreferences[0] || null,
+            bookMarks: BookMark,
+        };
     } catch (error: unknown) {
         console.error(error);
         return 'Failed to get me';
@@ -112,7 +118,13 @@ export const getUserById = async (id: string): Promise<any | string> => {
         if (!user) {
             return 'User not found';
         }
-        return user;
+        // Convert userPreferences array to single object since it's a one-to-one relation
+        const { BookMark, userPreferences, ...rest } = user;
+        return {
+            ...rest,
+            userPreferences: userPreferences[0] || null,
+            bookmarks: BookMark,
+        };
     } catch (error: unknown) {
         console.error(error);
         return 'Failed to get user';
@@ -150,7 +162,13 @@ export const getUserByEmail = async (email: string): Promise<any | string> => {
         if (!user) {
             return 'User not found';
         }
-        return user;
+        // Convert userPreferences array to single object since it's a one-to-one relation
+        const { BookMark, userPreferences, ...rest } = user;
+        return {
+            ...rest,
+            userPreferences: userPreferences[0] || null,
+            bookmarks: BookMark,
+        };
     } catch (error: unknown) {
         console.error(error);
         return 'Failed to get user by email';
@@ -195,8 +213,18 @@ export const getUsers = async (page: string): Promise<{ users: any[], page: numb
             }
         });
 
+        // Convert userPreferences array to single object for each user
+        const usersWithPreferences = users.map(user => {
+            const { BookMark, userPreferences, ...rest } = user;
+            return {
+                ...rest,
+                userPreferences: userPreferences[0] || null,
+                bookmarks: BookMark,
+            };
+        });
+
         return {
-            users: users,
+            users: usersWithPreferences,
             page: pageNumber,
             limit,
             total: total,

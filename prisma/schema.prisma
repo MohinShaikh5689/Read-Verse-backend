@@ -24,8 +24,10 @@ model User {
 
 model userPreferences {
   id                  String   @id @default(uuid())
-  allowReminders      Boolean  @default(true)
+  allowReminders      Boolean  @default(false)
   appLanguage         String   @default("en")
+  readingLanguage     String   @default("en")
+  appTheme            String   @default("light")
   authorPreferences   String[] @default([])
   categoryPreferences String[] @default([])
   bookPreferences     String[] @default([])
@@ -92,6 +94,7 @@ model Book {
   authors       Author[]
   totalDuration Int
   slug          String           @unique
+  coverUrl      String?
   translations  TranslatedBook[]
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
@@ -232,6 +235,7 @@ model TranslatedPodcast {
   description  String?
   summary      String
   audioUrl     String?
+  imageUrl     String?
   keyTakeaways String[]
   language     String
   podcastId    String

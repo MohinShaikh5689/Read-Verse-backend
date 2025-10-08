@@ -27,5 +27,6 @@ export interface TranslatedPodcast {
     title: string;
     summary: string;
     description: string;
+    imageUrl: string | null;
     keyTakeaways: string[];
 }

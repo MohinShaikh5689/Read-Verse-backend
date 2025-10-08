@@ -262,8 +262,9 @@ export const createPodcastHandler = asyncHandle(async (request: FastifyRequest, 
     return errorHandle('At least one category is required', reply, 400);
   }
 
+  console.log("files", files);
   // Get file URLs
-  const imageUrl = files.imageFile;
+  const imageUrl = files.englishImage;
 
 
   if (!imageUrl) {
@@ -293,6 +294,7 @@ export const createPodcastHandler = asyncHandle(async (request: FastifyRequest, 
         title: value.title,
         summary: value.summary,
         description: value.description,
+        imageUrl: files[`${_lang}Image`] || null,
         keyTakeaways: value.keyTakeaways,
       }
     });
@@ -309,6 +311,7 @@ export const createPodcastHandler = asyncHandle(async (request: FastifyRequest, 
     return errorHandle(newPodcast, reply, 500);
   }
   return successHandle(newPodcast, reply, 201);
+
 });
 
 export const updatePodcastHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -414,6 +417,7 @@ export const updatePodcastHandler = asyncHandle(async (request: FastifyRequest, 
         summary: value.summary,
         description: value.description,
         keyTakeaways: value.keyTakeaways,
+        imageUrl: files[`${_lang}Image`] || null,
       }
     });
 

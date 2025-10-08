@@ -239,6 +239,13 @@ export const BookRoutes = async (fastify: FastifyInstance): Promise<void> => {
                     ids: { type: 'array', items: { type: 'string' } }
                 },
                 required: ['ids']
+            },
+            querystring: {
+                type: 'object',
+                properties: {
+                    language: { type: 'string' }
+                },
+                required: ['language']
             }
         }
     }, getBookCollectionsByIdsHandler);

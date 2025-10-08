@@ -590,7 +590,8 @@ export const getBooksByCategorySlugHandler = asyncHandle(async (request: Fastify
 
 export const getBookCollectionsByIdsHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     const { ids } = request.body as { ids: string[] };
-    const collections = await getBookCollectionsByIds(ids);
+    const { language } = request.query as { language: string };
+    const collections = await getBookCollectionsByIds(ids, language);
     if (typeof collections === 'string') {
         return errorHandle(collections, reply, 500);
     }

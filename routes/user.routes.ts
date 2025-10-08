@@ -121,7 +121,7 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
     }, getUsersHandler);
 
     // Delete user
-    fastify.delete('/users/:id', {
+    fastify.delete('/users', {
         preHandler: authGuard,
         schema: {
             tags: ['users'],
@@ -142,6 +142,8 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
                 properties: {
                     allowReminders: { type: 'boolean' },
                     appLanguage: { type: 'string' },
+                    readingLanguage: { type: 'string' },
+                    appTheme: { type: 'string' },
                     authorPreferences: { type: 'array', items: { type: 'string' } },
                     categoryPreferences: { type: 'array', items: { type: 'string' } },
                     bookPreferences: { type: 'array', items: { type: 'string' } }

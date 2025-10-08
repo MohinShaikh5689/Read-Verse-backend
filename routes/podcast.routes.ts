@@ -117,6 +117,13 @@ export const PodcastRoutes = async (fastify: FastifyInstance) => {
                 },
                 required: ['categoryIds'],
             },
+            querystring:{
+                type: 'object',
+                properties: {
+                    language: { type: 'string' },
+                },
+                required: ['language'],
+            }
         },
     }, getPodcastsByCategoryIdsHandler);
     fastify.get('/podcasts-by-category-slug/:slug', {
