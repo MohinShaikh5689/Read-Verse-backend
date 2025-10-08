@@ -480,7 +480,6 @@ export const getBookCollectionById = async (id: string, language: string, includ
                     language: true,
                     bookCollection: {
                         select: {
-                            id: true,
                             imageUrl: true,
                             books: true
                         }

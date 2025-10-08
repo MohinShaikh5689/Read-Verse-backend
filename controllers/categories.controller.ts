@@ -246,7 +246,8 @@ export const searchCategoriesHandler = asyncHandle(async (request: FastifyReques
 
 export const getCategoriesByIdsHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
   const { ids } = request.body as { ids: string[] };
-  const categories = await getCategoriesByIds(ids);
+  const { language } = request.query as { language: string };
+  const categories = await getCategoriesByIds(ids, language);
   if(typeof categories === 'string'){
     return errorHandle(categories, reply, 500);
   }

@@ -71,6 +71,13 @@ export const CategoryRoutes = async (fastify: FastifyInstance) => {
                 },
                 required: ['ids'],
             },
+            querystring:{
+                type: 'object',
+                properties: {
+                    language: { type: 'string' },
+                },
+                required: ['language'],
+            }
         },
     }, getCategoriesByIdsHandler);
 

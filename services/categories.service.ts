@@ -194,11 +194,21 @@ export const searchCategories = async (query: string, language: string) => {
     }
 };
 
-export const getCategoriesByIds = async (ids: string[]) => {
+export const getCategoriesByIds = async (ids: string[], language: string) => {
     try {
         const categories = await prisma.category.findMany({
             where: {
                 id: { in: ids },
+            },
+            include: {
+                translations: {
+                    where: { language: language },
+                    select:{
+                        name: true,
+                        description: true,
+                        language: true,
+                    }
+                }
             },
         });
         return categories;
