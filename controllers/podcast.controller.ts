@@ -505,7 +505,8 @@ export const searchPodcastsHandler = asyncHandle(async (request: FastifyRequest,
 
 export const getPodcastsCollectionsByIdsHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
   const { ids } = request.body as { ids: string[] };
-  const collections = await getPodcastsCollectionsByIds(ids);
+  const { language } = request.query as { language: string };
+  const collections = await getPodcastsCollectionsByIds(ids, language);
   if (typeof collections === 'string') {
     return errorHandle(collections, reply, 500);
   }

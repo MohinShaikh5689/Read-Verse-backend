@@ -558,11 +558,21 @@ export const searchPodcasts = async (query: string, language: string, page: stri
     }
 }
 
-export const getPodcastsCollectionsByIds = async (ids: string[]) => {
+export const getPodcastsCollectionsByIds = async (ids: string[], language: string) => {
     try {
         const collections = await prisma.podcastCollection.findMany({
             where: {
                 id: { in: ids },
+            },
+            include: {
+                translations: {
+                    where: { language: language },
+                    select:{
+                        name: true,
+                        description: true,
+                        language: true,
+                    }
+                }
             },
         });
         return collections;
