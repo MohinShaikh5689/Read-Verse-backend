@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import type { Page, AddCollectionsToPage } from "../types/page.js";
-import { addCollectionsToPage, addMultipleCollectionsToPage, createPage, getPageBySlug, updatePageBlocks, getAllPages } from "../services/page.service.js";
+import { addCollectionsToPage, addMultipleCollectionsToPage, createPage, getPageBySlug, updatePageBlocks, getAllPages, deletePageById } from "../services/page.service.js";
 import { isFirebaseConfigured, uploadFile } from "../utils/firebase-storage.js";
 
 
@@ -124,6 +124,7 @@ export const addCollectionsToPageHandler = asyncHandle(async (req: FastifyReques
 
 export const getPageBySlugHandler = asyncHandle(async (req: FastifyRequest, reply: FastifyReply) => {
     const { slug } = req.params as { slug: string };
+    console.log("slug", slug);
     const page = await getPageBySlug(slug);
     if (typeof page === 'string') {
         return errorHandle(page, reply, 500);
@@ -232,4 +233,15 @@ export const getAllPagesHandler = asyncHandle(async (req: FastifyRequest, reply:
         return errorHandle(pages, reply, 500);
     }
     return successHandle(pages, reply, 200);
+});
+
+export const deletePageByIdHandler = asyncHandle(async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string };
+    const result = await deletePageById(id);
+    if (typeof result === 'string') {
+        return errorHandle(result, reply, 500);
+    }
+    return successHandle({
+        message: 'Page deleted successfully',
+    }, reply, 200);
 });

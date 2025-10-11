@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createPageHandler, addCollectionsToPageHandler, getPageBySlugHandler, updatePageBlocksHandler, getAllPagesHandler } from "../controllers/page.controller.js";
+import { createPageHandler, addCollectionsToPageHandler, getPageBySlugHandler, updatePageBlocksHandler, getAllPagesHandler, deletePageByIdHandler } from "../controllers/page.controller.js";
 
 export const PageRoutes = async (fastify: FastifyInstance) => {
     fastify.post('/pages', {
@@ -36,4 +36,11 @@ export const PageRoutes = async (fastify: FastifyInstance) => {
             summary: 'Get all pages',
         },
     }, getAllPagesHandler);
+
+    fastify.delete('/pages/:id', {
+        schema: {
+            tags: ['pages'],
+            summary: 'Delete a page by id',
+        },
+    }, deletePageByIdHandler);
 }

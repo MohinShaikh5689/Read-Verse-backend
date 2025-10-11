@@ -208,6 +208,7 @@ export const getBookById = async (id: string, language: string) => {
                     description: true,
                     published: true,
                     audioEnabled: true,
+                    coverUrl: true,
                     book: {
                         select: {
                             slug: true,

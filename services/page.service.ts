@@ -184,3 +184,15 @@ export const getAllPages = async () => {
         return 'Failed to get all pages';
     }
 }
+
+export const deletePageById = async (id: string) => {
+    try {
+        await prisma.dynamicPage.delete({
+            where: { id: id },
+        });
+        return true;
+    } catch (error: unknown) {
+        console.error(error);
+        return false;
+    }
+}
