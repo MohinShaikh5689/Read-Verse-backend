@@ -865,6 +865,7 @@ export const getSummariesByBookId = async (bookId: string, language: string) => 
                             content: true,
                             keyTakeaways: true,
                             language: true,
+                            audioUrl: true,
                         }
                     }
                 },

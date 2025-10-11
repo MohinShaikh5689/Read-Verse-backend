@@ -64,26 +64,30 @@ export const createPodcastChannelHandler = asyncHandle(async (request: FastifyRe
       }
     }
   }
-  if (!metadata.englishName) {
-    return errorHandle('name is required', reply, 400);
+  // Extract the English title from translations array or use englishTitle/englishName
+  const englishTranslation = metadata.translations?.find((t: any) => t.language === 'en');
+  const englishName = englishTranslation?.name || metadata.englishTitle || metadata.englishName;
+
+  if (!englishName) {
+    return errorHandle('English name is required', reply, 400);
   }
 
   const imageUrl = files.imageUrl ?? Object.values(files)[0];
   console.log(metadata)
 
   const podcastChannel: PodcastChannel = {
-    name: metadata.englishName,
+    name: englishName,
     imageUrl: imageUrl,
     slug: metadata.slug,
     podcastsIds: metadata.podcastIds || [],
   }
 
-  const translatedPodcastChannel: TranslatedPodcastChannel[] = Object.entries(metadata)
-    .filter(([key]) => ['en', 'hi', 'ar', 'bn'].includes(key))
-    .map(([_lang, value]) => ({
-      language: value.language,
-      name: value.name,
-      description: value.description,
+  // Map translations array to TranslatedPodcastChannel format
+  const translatedPodcastChannel: TranslatedPodcastChannel[] = (metadata.translations || [])
+    .map((translation: any) => ({
+      language: translation.language,
+      name: translation.name,
+      description: translation.description,
     }));
 
   const newPodcastChannel = await createPodcastChannel(podcastChannel, translatedPodcastChannel);
@@ -161,20 +165,28 @@ export const updatePodcastChannelHandler = asyncHandle(async (request: FastifyRe
   console.log("imageUrl", imageUrl);
   console.log(metadata)
 
+  // Extract the English title from translations array or use englishTitle
+  const englishTranslation = metadata.translations?.find((t: any) => t.language === 'en');
+  const englishName = englishTranslation?.name || metadata.englishTitle || metadata.englishName;
+
   const podcastChannel: PodcastChannel = {
-    name: metadata.englishName,
+    name: englishName,
     imageUrl: imageUrl,
     slug: metadata.slug,
     podcastsIds: metadata.podcastIds || [],
   }
 
-  const translatedPodcastChannel: TranslatedPodcastChannel[] = Object.entries(metadata)
-    .filter(([key]) => ['english', 'hindi', 'arabic', 'bahasa'].includes(key))
-    .map(([_lang, value]) => ({
-      language: value.language,
-      name: value.name,
-      description: value.description,
+  // Map translations array to TranslatedPodcastChannel format
+  const translatedPodcastChannel: TranslatedPodcastChannel[] = (metadata.translations || [])
+    .map((translation: any) => ({
+      language: translation.language,
+      name: translation.name,
+      description: translation.description,
     }));
+
+  console.log("podcastChannel", podcastChannel);
+  console.log("translatedPodcastChannel", translatedPodcastChannel);
+
 
   const updatedPodcastChannel = await updatePodcastChannel(id, podcastChannel, translatedPodcastChannel);
   if (typeof updatedPodcastChannel === 'string') {

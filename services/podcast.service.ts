@@ -35,8 +35,7 @@ export const updatePodcastChannel = async (id: string, podcastChannel: PodcastCh
                 where: { id: id },
                 data: podcastChannel,
             });
-
-            for (const translation of translatedPodcast) {
+            for (const translation of translatedPodcast) {                
                 // Check if translation exists for this language
                 const existingTranslation = await prisma.translatedPodcastCollection.findUnique({
                     where: {
@@ -71,13 +70,14 @@ export const updatePodcastChannel = async (id: string, podcastChannel: PodcastCh
                     });
                 }
             }
+            console.log(`✅ Successfully updated podcast collection with ${translatedPodcast.length} translations`);
             return updatedPodcastChannel;
         }, {
             timeout: 30000 // Increase timeout to 30 seconds
         });
         return result;
     } catch (error: unknown) {
-        console.error(error);
+        console.error('❌ Failed to update podcast channel:', error);
         return 'Failed to update podcast channel';
     }
 }

@@ -10,6 +10,9 @@
     "start": "node dist/server.js",
     "seed": "tsx scripts/seed.ts",
     "migrate:firebase": "tsx scripts/migrate-firebase-to-postgresql.js",
+    "migrate:podcasts": "tsx scripts/migrate-podcasts-from-firebase.ts",
+    "migrate:podcast-collections": "tsx scripts/migrate-podcast-collections-from-firebase.ts",
+    "migrate:cover-urls": "tsx scripts/migrate-cover-urls.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
