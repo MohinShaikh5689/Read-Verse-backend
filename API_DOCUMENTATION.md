@@ -22,7 +22,7 @@
 
 ## Overview
 
-The Nosis Admin API is a RESTful API built with Fastify and TypeScript. It provides endpoints for managing books, podcasts, authors, categories, users, and their related data. The API supports multi-language content and uses Firebase for authentication and file storage.
+The Read verse Admin API is a RESTful API built with Fastify and TypeScript. It provides endpoints for managing books, podcasts, authors, categories, users, and their related data. The API supports multi-language content and uses Firebase for authentication and file storage.
 
 ### Technology Stack
 - **Framework**: Fastify
