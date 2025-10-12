@@ -129,9 +129,11 @@ export const updateUserProgressHandler = asyncHandle(async (request: FastifyRequ
 
 // Bookmark handlers
 export const createBookmarkHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    const { id } = request.params as { id: string };
+    const { bookId } = request.body as { bookId: string };
     const userId = (request as any).user.uid;
-    const bookmarkData = { bookId: id, userId };
+    console.log("userId", userId);
+    console.log("bookId", bookId);
+    const bookmarkData = { bookId, userId };
     const bookmark = await createBookmark(bookmarkData, userId);
     if (typeof bookmark === 'string') {
         return errorHandle(bookmark, reply, 500);
@@ -140,8 +142,11 @@ export const createBookmarkHandler = asyncHandle(async (request: FastifyRequest,
 });
 
 export const deleteBookmarkHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    const { id } = request.params as { id: string };
-    const result = await deleteBookmark(id);
+    const { bookId } = request.body as { bookId: string };
+    const userId = (request as any).user.uid;
+    console.log("userId", userId);
+    console.log("bookId", bookId);
+    const result = await deleteBookmark(bookId, userId);
     if (result !== 'Bookmark deleted successfully') {
         return errorHandle(result, reply, 500);
     }

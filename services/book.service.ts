@@ -255,7 +255,7 @@ export const getBookById = async (id: string, language: string) => {
                 ...rawBook,
                 book: {
                     ...rawBook.book,
-                    summaries: rawBook.book.summaries.map(summary => ({
+                    summaries: rawBook.book.summaries.map((summary: any) => ({
                         id: summary.id,
                         order: summary.order,
                         translatedSummary: summary.TranslatedSummary
@@ -448,7 +448,7 @@ export const getBookCollections = async (page: string, language: string) => {
             page: pageNumber,
             limit,
             total: total,
-            collections: collections.map(col => ({
+            collections: collections.map((col: any) => ({
                 id: col.bookCollection.id,
                 title: col.title,
                 description: col.description,
@@ -750,7 +750,7 @@ export const getBookCollectionsByIds = async (ids: string[], language: string) =
         });
         
         // Convert TranslatedBookCollection to camelCase translatedBookCollection
-        const collections = rawCollections.map(collection => {
+        const collections = rawCollections.map((collection: any) => {
             const { TranslatedBookCollection, ...rest } = collection;
             return {
                 ...rest,
@@ -875,7 +875,7 @@ export const getSummariesByBookId = async (bookId: string, language: string) => 
             });
             
             // Convert TranslatedSummary to camelCase translatedSummary
-            summaries = rawSummaries.map(summary => ({
+            summaries = rawSummaries.map((summary: any) => ({
                 id: summary.id,
                 title: summary.title,
                 order: summary.order,

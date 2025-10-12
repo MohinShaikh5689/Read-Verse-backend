@@ -214,34 +214,38 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
     }, updateUserProgressHandler);
 
     // Bookmark routes
-    fastify.post('/users/bookmarks/:id', {
+    fastify.post('/users/bookmarks', {
         preHandler: authGuard,
         schema: {
             tags: ['bookmarks'],
-            summary: 'Create a bookmark',
+            summary: 'Create a bookmark for a book',
+            description: 'Creates a bookmark for the specified book ID',
             security: [{ bearerAuth: [] }],
-            params: {
+            body: {
                 type: 'object',
                 properties: {
-                    bookId: { type: 'string' }
+                    bookId: {
+                        type: 'string',
+                        description: 'The ID of the book to bookmark'
+                    }
                 },
                 required: ['bookId']
             }
         }
     }, createBookmarkHandler);
 
-    fastify.delete('/users/bookmarks/:id', {
+    fastify.delete('/users/bookmarks', {
         preHandler: authGuard,
         schema: {
             tags: ['bookmarks'],
             summary: 'Delete a bookmark',
             security: [{ bearerAuth: [] }],
-            params: {
+            body:{
                 type: 'object',
                 properties: {
-                    id: { type: 'string' }
+                    bookId: { type: 'string' }
                 },
-                required: ['id']
+                required: ['bookId']
             }
         }
     }, deleteBookmarkHandler);

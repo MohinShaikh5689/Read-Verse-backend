@@ -214,7 +214,7 @@ export const getUsers = async (page: string): Promise<{ users: any[], page: numb
         });
 
         // Convert userPreferences array to single object for each user
-        const usersWithPreferences = users.map(user => {
+        const usersWithPreferences = users.map((user: any) => {
             const { BookMark, userPreferences, ...rest } = user;
             return {
                 ...rest,
@@ -335,8 +335,8 @@ export const createUserProgress = async (progress: Omit<UserProgress, 'createdAt
 
 export const updateUserProgress = async (bookId: string, userId: string, progress: Partial<UserProgress>): Promise<any | string> => {
     try {
-        const result = await prisma.$transaction(async (prisma) => {
-            const updatedProgress = await prisma.userProgress.update({
+        const result = await prisma.$transaction(async (tx) => {
+            const updatedProgress = await tx.userProgress.update({
                 where: {
                     bookId_userId: {
                         bookId: bookId,
@@ -359,6 +359,9 @@ export const updateUserProgress = async (bookId: string, userId: string, progres
 // Bookmark methods
 export const createBookmark = async (bookmark: Omit<BookMark, 'id' | 'createdAt' | 'updatedAt'>, userId: string): Promise<any | string> => {
     try {
+        console.log("Entered createBookmark");
+        console.log("bookmark", bookmark);
+        console.log("userId", userId);
         const result = await prisma.$transaction(async (prisma) => {
             const newBookmark = await prisma.bookMark.create({
                 data: { ...bookmark, userId: userId },
@@ -374,11 +377,11 @@ export const createBookmark = async (bookmark: Omit<BookMark, 'id' | 'createdAt'
     }
 };
 
-export const deleteBookmark = async (id: string): Promise<string> => {
+export const deleteBookmark = async (id: string, userId: string): Promise<string> => {
     try {
-        await prisma.$transaction(async (prisma) => {
-            await prisma.bookMark.delete({
-                where: { id: id }
+        await prisma.$transaction(async (tx) => {
+            await tx.bookMark.deleteMany({
+                where: { bookId: id, userId: userId }
             });
         }, {
             timeout: 30000 // Increase timeout to 30 seconds
