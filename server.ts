@@ -13,7 +13,6 @@ import { PodcastRoutes } from './routes/podcast.routes.js';
 import { PageRoutes } from './routes/page.routes.js';
 import { ttsRoutes } from './routes/tts.routes.js';
 import { UserRoutes } from './routes/user.routes.js';
-// Load environment variables from .env file
 
 
 // Create Fastify instance

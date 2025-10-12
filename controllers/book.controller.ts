@@ -1,19 +1,19 @@
 import dotenv from 'dotenv';
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
-import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
+import { uploadFile, isSupabaseConfigured } from "../utils/supabase-storage.js";
 import type { Book, bookCollectionMetadataFields, BookCollection, Summary, TranslatedSummary, FreeBooks } from "../types/books.js";
 import { createBook , getBooks, getBookById, searchBooks, createBookCollection, getBookCollectionById, getBookCollections, updateBook, getBookBySlug, getBooksByAuthorId, getBooksByCategoryIds, getBooksByCategorySlug, updateBookCollection, getBookCollectionsByIds, createSummary, editSummary, getSummariesByBookId, deleteSummaryById, deleteBookCollectionById, deleteBookById, getBooksByAuthorIds, CreateFreeBooks, getFreeBooks, deleteFreeBooksById, getSummaryById } from "../services/book.service.js";
 dotenv.config();
 
 export const createBookHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!isFirebaseConfigured()) {
-        return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+    if (!isSupabaseConfigured()) {
+        return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
     }
 
     const parts = request.parts();
     let metadata: Record<string, any> = {};
-    let files: Record<string, string> = {}; // file field → firebase URL
+    let files: Record<string, string> = {}; // file field → supabase URL
     let summaryAudioFiles: Record<string, string> = {}; // summary audio files
     let languageImages: Record<string, string> = {}; // language image files
     console.log("files", files);
@@ -74,8 +74,8 @@ export const createBookHandler = asyncHandle(async (request: FastifyRequest, rep
                     files[part.fieldname] = uploadResult.publicUrl;
                 }
             } catch (error) {
-                console.error('Firebase upload error:', error);
-                return errorHandle('Failed to upload file to Firebase Storage', reply, 500);
+                console.error('Supabase Storage upload error:', error);
+                return errorHandle('Failed to upload file to Supabase Storage', reply, 500);
             }
         } else if ('value' in part) {
             const rawValue = (part as { value: any }).value as unknown;
@@ -192,13 +192,13 @@ export const createBookHandler = asyncHandle(async (request: FastifyRequest, rep
     }, reply, 201);
 });
 export const EditBookHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!isFirebaseConfigured()) {
-        return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+    if (!isSupabaseConfigured()) {
+        return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
     }
     const { id } = request.params as { id: string };
     const parts = request.parts();
     let metadata: Record<string, any> = {};
-    let files: Record<string, string> = {}; // file field → firebase URL
+    let files: Record<string, string> = {}; // file field → supabase URL
     
     console.log("=== PROCESSING MULTIPART DATA ===");
     
@@ -346,12 +346,12 @@ export const searchBooksHandler = asyncHandle(async (request: FastifyRequest, re
 });
 
 export const createBookCollectionHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!isFirebaseConfigured()) {
-        return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+    if (!isSupabaseConfigured()) {
+        return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
     }
     const parts = request.parts();
     let metadata: Record<string, any> = {};
-    let files: Record<string, string> = {}; // file field → firebase URL
+    let files: Record<string, string> = {}; // file field → supabase URL
     console.log("files", files);
 
     for await (const part of parts) {
@@ -387,8 +387,8 @@ export const createBookCollectionHandler = asyncHandle(async (request: FastifyRe
 
                 files[part.fieldname] = uploadResult.publicUrl;
             } catch (error) {
-                console.error('Firebase upload error:', error);
-                return errorHandle('Failed to upload file to Firebase Storage', reply, 500);
+                console.error('Supabase Storage upload error:', error);
+                return errorHandle('Failed to upload file to Supabase Storage', reply, 500);
             }
         } else if ('value' in part) {
             const rawValue = (part as { value: any }).value as unknown;
@@ -439,12 +439,12 @@ export const createBookCollectionHandler = asyncHandle(async (request: FastifyRe
 
 export const updateBookCollectionHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
-    if (!isFirebaseConfigured()) {
-        return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+    if (!isSupabaseConfigured()) {
+        return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
     }
     const parts = request.parts();
     let metadata: Record<string, any> = {};
-    let files: Record<string, string> = {}; // file field → firebase URL
+    let files: Record<string, string> = {}; // file field → supabase URL
     console.log("files", files);
 
     for await (const part of parts) {
@@ -480,8 +480,8 @@ export const updateBookCollectionHandler = asyncHandle(async (request: FastifyRe
 
                 files[part.fieldname] = uploadResult.publicUrl;
             } catch (error) {
-                console.error('Firebase upload error:', error);
-                return errorHandle('Failed to upload file to Firebase Storage', reply, 500);
+                console.error('Supabase Storage upload error:', error);
+                return errorHandle('Failed to upload file to Supabase Storage', reply, 500);
             }
         } else if ('value' in part) {
             const rawValue = (part as { value: any }).value as unknown;

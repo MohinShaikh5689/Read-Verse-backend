@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
 import type { Page, AddCollectionsToPage } from "../types/page.js";
 import { addCollectionsToPage, addMultipleCollectionsToPage, createPage, getPageBySlug, updatePageBlocks, getAllPages, deletePageById } from "../services/page.service.js";
-import { isFirebaseConfigured, uploadFile } from "../utils/firebase-storage.js";
+import { isSupabaseConfigured, uploadFile } from "../utils/supabase-storage.js";
 
 
 export const createPageHandler = asyncHandle(async (req: FastifyRequest, reply: FastifyReply) => {
@@ -15,13 +15,13 @@ export const createPageHandler = asyncHandle(async (req: FastifyRequest, reply: 
 }
 )
 export const addCollectionsToPageHandler = asyncHandle(async (req: FastifyRequest, reply: FastifyReply) => {
-    if (!isFirebaseConfigured()) {
-        return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+    if (!isSupabaseConfigured()) {
+        return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
     }
 
     const parts = req.parts();
     let metadata: Record<string, any> = {};
-    let files: Record<string, string> = {}; // file field → firebase URL
+    let files: Record<string, string> = {}; // file field → supabase URL
 
     for await (const part of parts) {
         if ('file' in part && part.file && 'filename' in part && part.filename) {
@@ -138,13 +138,13 @@ export const updatePageBlocksHandler = asyncHandle(async (req: FastifyRequest, r
     
     if (contentType.includes('multipart/form-data')) {
         // Handle multipart form data with potential file uploads
-        if (!isFirebaseConfigured()) {
-            return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+        if (!isSupabaseConfigured()) {
+            return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
         }
 
         const parts = req.parts();
         let metadata: Record<string, any> = {};
-        let files: Record<string, string> = {}; // file field → firebase URL
+        let files: Record<string, string> = {}; // file field → supabase URL
 
         for await (const part of parts) {
             if ('file' in part && part.file && 'filename' in part && part.filename) {
@@ -195,7 +195,7 @@ export const updatePageBlocksHandler = asyncHandle(async (req: FastifyRequest, r
             if (files[`imageUrl_${index}`] || files.imageUrl) {
                 finalImageUrl = files[`imageUrl_${index}`] || files.imageUrl;
             }
-            // Second priority: existing valid Firebase URLs (not blob URLs)
+            // Second priority: existing valid Supabase URLs (not blob URLs)
             else if (block.imageUrl && !block.imageUrl.startsWith('blob:')) {
                 finalImageUrl = block.imageUrl;
             }

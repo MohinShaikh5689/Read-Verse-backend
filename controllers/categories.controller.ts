@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
-import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
+import { uploadFile, isSupabaseConfigured } from "../utils/supabase-storage.js";
 import type { Category } from '../types/category.js';
 import { createCategory, getCategories, getCategoryById, searchCategories, getCategoriesByIds, deleteCategoryById, updateCategory } from '../services/categories.service.js';
 
@@ -10,8 +10,8 @@ dotenv.config();
 export const createCategoryHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     console.log("entered here");
     
-    if (!isFirebaseConfigured()) {
-        return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+    if (!isSupabaseConfigured()) {
+        return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
     }
     
     const parts = request.parts();
@@ -48,8 +48,8 @@ export const createCategoryHandler = asyncHandle(async (request: FastifyRequest,
 
                 files[part.fieldname] = uploadResult.publicUrl;
             } catch (error) {
-                console.error('Firebase upload error:', error);
-                return errorHandle('Failed to upload file to Firebase Storage', reply, 500);
+                console.error('Supabase Storage upload error:', error);
+                return errorHandle('Failed to upload file to Supabase Storage', reply, 500);
             }
         } else if ('value' in part) {
             const rawValue = (part as { value: any }).value as unknown;
@@ -117,8 +117,8 @@ export const createCategoryHandler = asyncHandle(async (request: FastifyRequest,
 
 export const updateCategoryHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     
-    if (!isFirebaseConfigured()) {
-        return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+    if (!isSupabaseConfigured()) {
+        return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
     }
     const { id } = request.params as { id: string };
     const parts = request.parts();
@@ -155,8 +155,8 @@ export const updateCategoryHandler = asyncHandle(async (request: FastifyRequest,
 
                 files[part.fieldname] = uploadResult.publicUrl;
             } catch (error) {
-                console.error('Firebase upload error:', error);
-                return errorHandle('Failed to upload file to Firebase Storage', reply, 500);
+                console.error('Supabase Storage upload error:', error);
+                return errorHandle('Failed to upload file to Supabase Storage', reply, 500);
             }
         } else if ('value' in part) {
             const rawValue = (part as { value: any }).value as unknown;

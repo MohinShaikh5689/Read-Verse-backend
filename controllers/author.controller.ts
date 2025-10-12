@@ -1,19 +1,19 @@
 import dotenv from 'dotenv';
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { asyncHandle, successHandle, errorHandle } from "../utils/handler.js";
-import { uploadFile, isFirebaseConfigured } from "../utils/firebase-storage.js";
+import { uploadFile, isSupabaseConfigured } from "../utils/supabase-storage.js";
 import { createAuthor, getAuthors, getAuthorById, searchAuthors, updateAuthor, deleteAuthorById, getAuthorsByIds } from "../services/author.service.js";
 import type { Author, TranslatedAuthor } from '../types/author.js';
 dotenv.config();
 
 export const createAuthorHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-  if (!isFirebaseConfigured()) {
-    return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+  if (!isSupabaseConfigured()) {
+    return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
   }
 
   const parts = request.parts();
   let metadata: Record<string, any> = {};
-  let files: Record<string, string> = {}; // file field → firebase URL
+  let files: Record<string, string> = {}; // file field → supabase URL
 
   for await (const part of parts) {
     if ('file' in part && part.file && 'filename' in part && part.filename) {
@@ -41,8 +41,8 @@ export const createAuthorHandler = asyncHandle(async (request: FastifyRequest, r
 
         files[part.fieldname] = uploadResult.publicUrl;
       } catch (error) {
-        console.error('Firebase upload error:', error);
-        return errorHandle('Failed to upload file to Firebase Storage', reply, 500);
+        console.error('Supabase Storage upload error:', error);
+        return errorHandle('Failed to upload file to Supabase Storage', reply, 500);
       }
     } else if ('value' in part) {
       const rawValue = (part as { value: any }).value as unknown;
@@ -126,13 +126,13 @@ export const searchAuthorsHandler = asyncHandle(async (request: FastifyRequest, 
 
 export const updateAuthorHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
   const { id } = request.params as { id: string };
-  if (!isFirebaseConfigured()) {
-    return errorHandle('Firebase Storage is not configured. Please check your environment variables.', reply, 500);
+  if (!isSupabaseConfigured()) {
+    return errorHandle('Supabase Storage is not configured. Please check your environment variables.', reply, 500);
   }
 
   const parts = request.parts();
   let metadata: Record<string, any> = {};
-  let files: Record<string, string> = {}; // file field → firebase URL
+  let files: Record<string, string> = {}; // file field → supabase URL
 
   for await (const part of parts) {
     if ('file' in part && part.file && 'filename' in part && part.filename) {
@@ -160,8 +160,8 @@ export const updateAuthorHandler = asyncHandle(async (request: FastifyRequest, r
 
         files[part.fieldname] = uploadResult.publicUrl;
       } catch (error) {
-        console.error('Firebase upload error:', error);
-        return errorHandle('Failed to upload file to Firebase Storage', reply, 500);
+        console.error('Supabase Storage upload error:', error);
+        return errorHandle('Failed to upload file to Supabase Storage', reply, 500);
       }
     } else if ('value' in part) {
       const rawValue = (part as { value: any }).value as unknown;
