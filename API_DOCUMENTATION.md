@@ -1,4 +1,4 @@
-# Nosis Admin API Documentation
+# Read Verse Admin API Documentation
 
 ## Table of Contents
 1. [Overview](#overview)

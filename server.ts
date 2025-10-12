@@ -29,10 +29,7 @@ const start = async (): Promise<void> => {
     const corsOrigins = process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
       : [
-        'https://nosis-admin-nine.vercel.app',
-        'https://main.d14juirgqq66w5.amplifyapp.com',
         'http://localhost:5173',
-        'https://admin.nosisapp.com'
       ];
 
     const corsOptions = {
@@ -58,7 +55,7 @@ const start = async (): Promise<void> => {
     await fastify.register(swagger, {
       openapi: {
         info: {
-          title: 'nosis-api',
+          title: 'Read verse-api',
           description: 'API documentation',
           version: '1.0.0'
         },
@@ -87,7 +84,7 @@ const start = async (): Promise<void> => {
       return {
         status: 'OK',
         timestamp: new Date().toISOString(),
-        service: 'Nosis API Engine'
+        service: 'Read Verse API Engine'
       };
     };
 
