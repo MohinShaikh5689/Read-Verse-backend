@@ -502,6 +502,45 @@ export const getCompletedUserProgress = async (userId: string, page: string, lan
     }
 };
 
+export const getIncompletePodcastProgress = async (userId: string, page: string, language: string) => {
+    try {
+        const pageNumber = parseInt(page) || 1;
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const result = await prisma.podcastProgress.findMany({
+            where: {
+                userId: userId,
+                completed: false
+            },
+            skip,
+            take: limit,
+            select: {
+                podcast: {
+                    select: {
+                        translations: {
+                            where: {
+                                language: language
+                            },
+                            select: {
+                                podcastId: true,
+                                title: true,
+                                imageUrl: true
+                            }
+                        }
+                    }
+                },
+                lastMinute: true,
+                completed: true
+            }
+        });
+        return result;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get incomplete podcast progress';
+    }
+};
+
 // Bookmark methods
 export const createBookmark = async (bookmark: Omit<BookMark, 'id' | 'createdAt' | 'updatedAt'>, userId: string): Promise<any | string> => {
     try {

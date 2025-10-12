@@ -19,7 +19,8 @@ import {
     generateTestToken,
     isBookmarked,
     getIncompleteUserProgress,
-    getCompletedUserProgress
+    getCompletedUserProgress,
+    getIncompletePodcastProgress
 } from '../services/user.service.js';
 
 export const createUserHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -112,10 +113,9 @@ export const updateUserPreferencesHandler = asyncHandle(async (request: FastifyR
 export const createUserProgressHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     const progressData = request.body as any;
     const userId = (request as any).user.uid;
-    const { type } = request.params as { type: string };
     console.log("progressData", progressData);
     console.log("userId", userId);
-    const progress = await createUserProgress(progressData, userId, type);
+    const progress = await createUserProgress(progressData, userId);
     if (typeof progress === 'string') {
         return errorHandle(progress, reply, 500);
     }
@@ -222,6 +222,16 @@ export const getCompletedUserProgressHandler = asyncHandle(async (request: Fasti
     const userId = (request as any).user.uid;
     const { page, language } = request.query as { page: string, language: string };
     const progress = await getCompletedUserProgress(userId, page, language);
+    if (typeof progress === 'string') {
+        return errorHandle(progress, reply, 500);
+    }
+    return successHandle(progress, reply, 200);
+});
+
+export const getIncompletePodcastProgressHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const userId = (request as any).user.uid;
+    const { page, language } = request.query as { page: string, language: string };
+    const progress = await getIncompletePodcastProgress(userId, page, language);
     if (typeof progress === 'string') {
         return errorHandle(progress, reply, 500);
     }
