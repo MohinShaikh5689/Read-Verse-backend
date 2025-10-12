@@ -13,6 +13,7 @@
     "migrate:podcasts": "tsx scripts/migrate-podcasts-from-firebase.ts",
     "migrate:podcast-collections": "tsx scripts/migrate-podcast-collections-from-firebase.ts",
     "migrate:cover-urls": "tsx scripts/migrate-cover-urls.ts",
+    "migrate:dev-to-prod": "tsx scripts/migrate-dev-to-prod.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

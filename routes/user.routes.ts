@@ -15,7 +15,10 @@ import {
     deleteBookmarkHandler,
     getUserBookmarksHandler,
     getMeHandler,
-    generateTestTokenHandler
+    generateTestTokenHandler,
+    isBookmarkedHandler,
+    getIncompleteUserProgressHandler,
+    getCompletedUserProgressHandler
 } from "../controllers/user.controller.js";
 
 export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
@@ -184,9 +187,12 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
                     bookId: { type: 'string' },
                     completed: { type: 'boolean' },
                     lastChapter: { type: 'number' },
+                    podcastId: { type: 'string' },
+                    lastMinute: { type: 'number' },
+                    type: { type: 'string', enum: ['book', 'podcast'], default: 'book' }
                 },
-                required: ['bookId']
-            }
+                
+            },
         }
     }, createUserProgressHandler);
 
@@ -259,7 +265,8 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
             querystring: {
                 type: 'object',
                 properties: {
-                    page: { type: 'string', default: '1' }
+                    page: { type: 'string', default: '1' },
+                    language: { type: 'string' }
                 }
             }
         }
@@ -280,5 +287,55 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
         }
     }, generateTestTokenHandler);
 
+    // Check if book is bookmarked
+    fastify.get('/users/bookmarks/:bookId', {
+        preHandler: authGuard,
+        schema: {
+            tags: ['bookmarks'],
+            summary: 'Check if a book is bookmarked',
+            security: [{ bearerAuth: [] }],
+            params: {
+                type: 'object',
+                properties: {
+                    bookId: { type: 'string' }
+                },
+                required: ['bookId']
+            }
+        }
+    }, isBookmarkedHandler);
+
+    // Get incomplete user progress
+    fastify.get('/users/progress/incomplete', {
+        preHandler: authGuard,
+        schema: {
+            tags: ['user-progress'],
+            summary: 'Get incomplete user progress',
+            security: [{ bearerAuth: [] }],
+            querystring: {
+                type: 'object',
+                properties: {
+                    page: { type: 'string', default: '1' },
+                    language: { type: 'string' }
+                }
+            }
+        }
+    }, getIncompleteUserProgressHandler);
+
+    // Get completed user progress
+    fastify.get('/users/progress/completed', {
+        preHandler: authGuard,
+        schema: {
+            tags: ['user-progress'],
+            summary: 'Get completed user progress',
+            security: [{ bearerAuth: [] }],
+            querystring: {
+                type: 'object',
+                properties: {
+                    page: { type: 'string', default: '1' },
+                    language: { type: 'string' }
+                }
+            }
+        }
+    }, getCompletedUserProgressHandler);
 };
 

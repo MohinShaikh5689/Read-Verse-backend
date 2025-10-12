@@ -316,13 +316,79 @@ export const updateUserPreferences = async (id: string, preferences: Partial<Use
 };
 
 // User Progress methods
-export const createUserProgress = async (progress: Omit<UserProgress, 'createdAt' | 'updatedAt'>, userId: string): Promise<any | string> => {
+export const createUserProgress = async (progress: any, userId: string): Promise<any | string> => {
     try {
         const result = await prisma.$transaction(async (prisma) => {
-            const newProgress = await prisma.userProgress.create({
-                data: { ...progress, userId: userId },
+            let Progress;
+            if (progress.type === 'book') {
+                const checkExisting = await prisma.userProgress.findFirst({
+                where: {
+                    userId: userId,
+                    bookId: progress.bookId
+                }
             });
-            return newProgress;
+            if (checkExisting) {
+                Progress = await prisma.userProgress.update({
+                    where: {
+                        bookId_userId: {
+                            bookId: progress.bookId,
+                            userId: userId
+                        }
+                    },
+                    data: {
+                        bookId: progress.bookId,
+                        lastChapter: progress.lastChapter,
+                        completed: progress.completed,
+                        userId: userId
+                    },
+                });
+                return Progress;
+            } else {
+                Progress = await prisma.userProgress.create({
+                    data: { 
+                        bookId: progress.bookId,
+                        lastChapter: progress.lastChapter,
+                        completed: progress.completed,
+                        userId: userId
+                    },
+                });
+                return Progress;
+            }
+            }else {
+                const checkExisting = await prisma.podcastProgress.findFirst({
+                    where: {
+                        userId: userId,
+                        podcastId: progress.podcastId,
+                    }
+                });
+                if (checkExisting) {
+                    Progress = await prisma.podcastProgress.update({
+                        where: {
+                            podcastId_userId: {
+                                podcastId: progress.podcastId,
+                                userId: userId
+                            }
+                        },
+                        data: { 
+                            podcastId: progress.podcastId,
+                            lastMinute: progress.lastMinute,
+                            completed: progress.completed,
+                            userId: userId
+                         },
+                    });
+                    return Progress;
+                } else {
+                    Progress = await prisma.podcastProgress.create({
+                        data: { 
+                            podcastId: progress.podcastId,
+                            lastMinute: progress.lastMinute,
+                            completed: progress.completed,
+                            userId: userId
+                         },
+                    });
+                    return Progress;
+                }
+            }
         }, {
             timeout: 30000 // Increase timeout to 30 seconds
         });
@@ -353,6 +419,86 @@ export const updateUserProgress = async (bookId: string, userId: string, progres
     } catch (error: unknown) {
         console.error(error);
         return 'Failed to update user progress';
+    }
+};
+
+export const getIncompleteUserProgress = async (userId: string, page: string, language: string) => {
+    try {
+        const pageNumber = parseInt(page) || 1;
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const result = await prisma.userProgress.findMany({
+            skip,
+            take: limit,
+            where: {
+                userId: userId,
+                completed: false
+            },
+            select:{
+                completed:true,
+                lastChapter:true,
+                book: {
+                    select:{
+                        translations:{
+                            where:{
+                                language: language
+                            },
+                            select:{
+                               title:true,
+                                bookId:true,
+                               coverUrl:true
+                            }
+
+                        }
+                    }
+                }
+            }
+        });
+        return result;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get incomplete user progress';
+    }
+};
+
+export const getCompletedUserProgress = async (userId: string, page: string, language: string) => {
+    try {
+        const pageNumber = parseInt(page) || 1;
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const result = await prisma.userProgress.findMany({
+            skip,
+            take: limit,
+            where: {
+                userId: userId,
+                completed: true
+            },
+            select:{
+                completed:true,
+                lastChapter:true,
+                book: {
+                    select:{
+                        translations:{
+                            where:{
+                                language: language
+                            },
+                            select:{
+                                bookId:true,
+                                title:true,
+                                coverUrl:true
+                            }
+
+                        }
+                    }
+                }
+            }
+        });
+        return result;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to get completed user progress';
     }
 };
 
@@ -393,7 +539,7 @@ export const deleteBookmark = async (id: string, userId: string): Promise<string
     }
 };
 
-export const getUserBookmarks = async (userId: string, page: string): Promise<{ bookmarks: any[], page: number, limit: number, total: number } | string> => {
+export const getUserBookmarks = async (userId: string, page: string, language: string) => {
     try {
         const pageNumber = parseInt(page) || 1;
         const limit = 10;
@@ -407,11 +553,20 @@ export const getUserBookmarks = async (userId: string, page: string): Promise<{ 
             where: { userId: userId },
             skip,
             take: limit,
-            include: {
+            select: {
                 book: {
-                    select: {
-                        id: true,
-                        title: true,
+                    select:{
+                        translations:{
+                            where:{
+                                language: language
+                            },
+                            select:{
+                                bookId:true,
+                                title:true,
+                                coverUrl:true
+                            }
+
+                        }
                     }
                 }
             },
@@ -462,3 +617,17 @@ export const generateTestToken = async (email: string): Promise<{ customToken: s
     }
 };
 
+export const isBookmarked = async (userId: string, bookId: string): Promise<boolean | string> => {
+    try {
+        console.log("Entered isBookmarked");
+        console.log("userId", userId);
+        console.log("bookId", bookId);
+        const bookmark = await prisma.bookMark.findFirst({
+            where: { userId: userId, bookId: bookId }
+        });
+        return bookmark ? true : false;
+    } catch (error: unknown) {
+        console.error(error);
+        return 'Failed to check bookmark status';
+    }
+}

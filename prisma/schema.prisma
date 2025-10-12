@@ -20,6 +20,7 @@ model User {
   userPreferences userPreferences[]
   userProgress    userProgress[]
   BookMark        BookMark[]
+  podcastProgress podcastProgress[]
 }
 
 model userPreferences {
@@ -47,6 +48,20 @@ model userProgress {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([bookId, userId])
+}
+
+model podcastProgress {
+  podcastId  String
+  userId     String
+  completed  Boolean  @default(false)
+  lastMinute Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  podcast Podcast @relation(fields: [podcastId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([podcastId, userId])
 }
 
 model BookMark {
@@ -213,18 +228,19 @@ model TranslatedPodcastCollection {
 }
 
 model Podcast {
-  id            String              @id @default(uuid())
-  title         String
-  imageUrl      String
-  totalDuration Int
-  published     Boolean
-  slug          String              @unique
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  categories    Category[]
-  translations  TranslatedPodcast[]
-  speakers      Author[]            @relation("Speakers")
-  guests        Author[]            @relation("Guests")
+  id              String              @id @default(uuid())
+  title           String
+  imageUrl        String
+  totalDuration   Int
+  published       Boolean
+  slug            String              @unique
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  categories      Category[]
+  translations    TranslatedPodcast[]
+  speakers        Author[]            @relation("Speakers")
+  guests          Author[]            @relation("Guests")
+  podcastProgress podcastProgress[]
 
   @@index([title])
 }
@@ -296,7 +312,7 @@ model DynamicPageBlock {
 }
 
 model FreeBooks {
-  bookId    String @id
+  bookId    String   @id
   book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
   order     Int
   createdAt DateTime @default(now())

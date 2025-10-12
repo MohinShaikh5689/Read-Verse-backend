@@ -1,3 +1,57 @@
+// import { createClient } from '@supabase/supabase-js';
+// import dotenv from 'dotenv';
+// import type { FastifyReply, FastifyRequest } from 'fastify';
+
+// dotenv.config();
+
+// // Supabase configuration
+// const SUPABASE_URL = process.env.SUPABASE_URL?.trim();
+// const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY?.trim();
+
+// if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+//     throw new Error('Supabase credentials are not properly configured. Please check SUPABASE_URL and SUPABASE_ANON_KEY in your environment variables.');
+// }
+
+// // Initialize Supabase client
+// const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// export const authGuard = async (request: FastifyRequest, reply: FastifyReply) => {
+//     const token = request.headers.authorization?.split(' ')[1];
+//     if (!token) {
+//         return reply.status(401).send({ message: 'Unauthorized' });
+//     }
+
+//     try {
+//         // Verify the JWT token with Supabase
+//         const { data: { user }, error } = await supabase.auth.getUser(token);
+
+//         if (error || !user) {
+//             return reply.status(401).send({ message: 'Invalid or expired token' });
+//         }
+
+//         // Attach user to request in a type-safe way
+//         (request as any).user = {
+//             uid: user.id,
+//             email: user.email,
+//             email_verified: user.email_confirmed_at !== null,
+//             name: user.user_metadata?.name || user.email,
+//             phone: user.phone,
+//             created_at: user.created_at,
+//             // Include any custom metadata
+//             ...user.user_metadata
+//         };
+
+//         return;
+//     } catch (error: any) {
+//         console.error('Auth verification error:', error);
+//         return reply.status(500).send({ message: 'Authentication error' });
+//     }
+// }
+
+
+// ============================================================================
+// FIREBASE AUTH GUARD (COMMENTED OUT - KEPT FOR REFERENCE)
+// ============================================================================
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import type { FastifyReply, FastifyRequest } from 'fastify';

@@ -16,7 +16,10 @@ import {
     deleteBookmark,
     getUserBookmarks,
     getMe,
-    generateTestToken
+    generateTestToken,
+    isBookmarked,
+    getIncompleteUserProgress,
+    getCompletedUserProgress
 } from '../services/user.service.js';
 
 export const createUserHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -109,7 +112,10 @@ export const updateUserPreferencesHandler = asyncHandle(async (request: FastifyR
 export const createUserProgressHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     const progressData = request.body as any;
     const userId = (request as any).user.uid;
-    const progress = await createUserProgress(progressData, userId);
+    const { type } = request.params as { type: string };
+    console.log("progressData", progressData);
+    console.log("userId", userId);
+    const progress = await createUserProgress(progressData, userId, type);
     if (typeof progress === 'string') {
         return errorHandle(progress, reply, 500);
     }
@@ -155,8 +161,8 @@ export const deleteBookmarkHandler = asyncHandle(async (request: FastifyRequest,
 
 export const getUserBookmarksHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
     const userId = (request as any).user.uid;
-    const { page } = request.query as { page: string };
-    const bookmarks = await getUserBookmarks(userId, page);
+    const { page, language } = request.query as { page: string, language: string };
+    const bookmarks = await getUserBookmarks(userId, page, language);
     if (typeof bookmarks === 'string') {
         return errorHandle(bookmarks, reply, 500);
     }
@@ -190,3 +196,34 @@ export const generateTestTokenHandler = asyncHandle(async (request: FastifyReque
     }, reply, 200);
 });
 
+export const isBookmarkedHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const { bookId } = request.params as { bookId: string };
+    const userId = (request as any).user.uid;
+
+    console.log("userId", userId);
+    console.log("bookId", bookId);
+    const bookmarked = await isBookmarked(userId, bookId);
+    if (typeof bookmarked === 'string') {
+        return errorHandle(bookmarked, reply, 500);
+    }
+    return successHandle(bookmarked, reply, 200);
+});
+export const getIncompleteUserProgressHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const userId = (request as any).user.uid;
+    const { page, language } = request.query as { page: string, language: string };
+    const progress = await getIncompleteUserProgress(userId, page, language);
+    if (typeof progress === 'string') {
+        return errorHandle(progress, reply, 500);
+    }
+    return successHandle(progress, reply, 200);
+});
+
+export const getCompletedUserProgressHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
+    const userId = (request as any).user.uid;
+    const { page, language } = request.query as { page: string, language: string };
+    const progress = await getCompletedUserProgress(userId, page, language);
+    if (typeof progress === 'string') {
+        return errorHandle(progress, reply, 500);
+    }
+    return successHandle(progress, reply, 200);
+});
