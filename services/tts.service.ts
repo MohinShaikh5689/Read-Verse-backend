@@ -14,16 +14,7 @@ export const saveTTS = async (jobId: string, audioUrl: string, type: string, lan
                 await prisma.translatedSummary.update({ where: { summaryId_language: { summaryId: jobId, language: language } }, data: { audioUrl } });
                 return summary;
             }
-        } else if (type === 'podcast') {
-            const podcast = await prisma.translatedPodcast.findUnique({
-                where: { podcastId_language: { podcastId: jobId, language: language } },
-            });
-            if (podcast) {
-                await prisma.translatedPodcast.update({ where: { podcastId_language: { podcastId: jobId, language: language } }, data: { audioUrl } });
-                console.log("podcast", podcast);
-                return podcast;
-            }
-        }
+        } 
     } catch (error) {
         console.error(error);
         return 'Failed to save TTS';
