@@ -9,7 +9,6 @@ import fastifyCors from '@fastify/cors';
 import { AuthorRoutes } from './routes/author.routes.js';
 import { BookRoutes } from './routes/book.routes.js';
 import { CategoryRoutes } from './routes/categories.routes.js';
-import { PodcastRoutes } from './routes/podcast.routes.js';
 import { PageRoutes } from './routes/page.routes.js';
 import { ttsRoutes } from './routes/tts.routes.js';
 import { UserRoutes } from './routes/user.routes.js';
@@ -117,7 +116,6 @@ const start = async (): Promise<void> => {
     await fastify.register(AuthorRoutes, { prefix: '/api/v1' });
     await fastify.register(BookRoutes, { prefix: '/api/v1' });
     await fastify.register(CategoryRoutes, { prefix: '/api/v1' });
-    await fastify.register(PodcastRoutes, { prefix: '/api/v1' });
     await fastify.register(PageRoutes, { prefix: '/api/v1' });
     await fastify.register(ttsRoutes, { prefix: '/api/v1' });
     await fastify.register(UserRoutes, { prefix: '/api/v1' });

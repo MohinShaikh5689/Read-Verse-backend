@@ -20,7 +20,6 @@ import {
     isBookmarked,
     getIncompleteUserProgress,
     getCompletedUserProgress,
-    getIncompletePodcastProgress
 } from '../services/user.service.js';
 
 export const createUserHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
@@ -228,12 +227,3 @@ export const getCompletedUserProgressHandler = asyncHandle(async (request: Fasti
     return successHandle(progress, reply, 200);
 });
 
-export const getIncompletePodcastProgressHandler = asyncHandle(async (request: FastifyRequest, reply: FastifyReply) => {
-    const userId = (request as any).user.uid;
-    const { page, language } = request.query as { page: string, language: string };
-    const progress = await getIncompletePodcastProgress(userId, page, language);
-    if (typeof progress === 'string') {
-        return errorHandle(progress, reply, 500);
-    }
-    return successHandle(progress, reply, 200);
-});

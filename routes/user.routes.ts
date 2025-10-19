@@ -18,8 +18,7 @@ import {
     generateTestTokenHandler,
     isBookmarkedHandler,
     getIncompleteUserProgressHandler,
-    getCompletedUserProgressHandler,
-    getIncompletePodcastProgressHandler
+    getCompletedUserProgressHandler
 } from "../controllers/user.controller.js";
 
 export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
@@ -338,22 +337,5 @@ export const UserRoutes = async (fastify: FastifyInstance): Promise<void> => {
             }
         }
     }, getCompletedUserProgressHandler);
-
-    // Get incomplete podcast progress
-    fastify.get('/users/podcast/progress/incomplete', {
-        preHandler: authGuard,
-        schema: {
-            tags: ['user-progress'],
-            summary: 'Get incomplete podcast progress',
-            security: [{ bearerAuth: [] }],
-            querystring: {
-                type: 'object',
-                properties: {
-                    page: { type: 'string', default: '1' },
-                    language: { type: 'string' }
-                }
-            }
-        }
-    }, getIncompletePodcastProgressHandler);
 };
 

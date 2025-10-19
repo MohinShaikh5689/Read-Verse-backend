@@ -362,7 +362,11 @@ export const createBookCollection = async (metadata: bookCollectionMetadataField
                 data: {
                     title: metadata.title,
                     imageUrl: metadata.imageUrl,
-                    books: metadata.books,
+                    books: {
+                        connect: metadata.books.map((book) => ({
+                            id: book,
+                        })),
+                    },
                     slug: metadata.slug,
                 },
             });
@@ -397,7 +401,11 @@ export const updateBookCollection = async (id: string, metadata: bookCollectionM
                 data: {
                     title: metadata.title,
                     imageUrl: metadata.imageUrl,
-                    books: metadata.books,
+                    books: {
+                        set: metadata.books.map((book) => ({
+                            id: book,
+                        })),
+                    },
                 },
             });
             for (const translation of translatedCollection) {
@@ -482,7 +490,11 @@ export const getBookCollectionById = async (id: string, language: string, includ
                     bookCollection: {
                         select: {
                             imageUrl: true,
-                            books: true
+                            books: {
+                                select: {
+                                    id: true,
+                                }
+                            }
                         }
                     }
                 }
@@ -490,18 +502,23 @@ export const getBookCollectionById = async (id: string, language: string, includ
             if (!includeBooks) {
                 return collection;
             }
-            books = await getBooksByIds(collection?.bookCollection.books || [], language);
+            books = await getBooksByIds(collection?.bookCollection.books.map(b => b.id) || [], language);
         } else {
             collection = await prisma.bookCollection.findUnique({
                 where: { id: id },
                 include: {
                     TranslatedBookCollection: true,
+                    books: {
+                        select: {
+                            id: true,
+                        }
+                    }
                 }
             });
             if (!includeBooks) {
                 return collection;
             }
-            books = await getBooksByIds(collection?.books || [], 'en');
+            books = await getBooksByIds(collection?.books.map(b => b.id) || [], 'en');
         }
 
         return {

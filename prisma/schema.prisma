@@ -20,7 +20,6 @@ model User {
   userPreferences userPreferences[]
   userProgress    userProgress[]
   BookMark        BookMark[]
-  podcastProgress podcastProgress[]
 }
 
 model userPreferences {
@@ -50,20 +49,6 @@ model userProgress {
   @@id([bookId, userId])
 }
 
-model podcastProgress {
-  podcastId  String
-  userId     String
-  completed  Boolean  @default(false)
-  lastMinute Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  podcast Podcast @relation(fields: [podcastId], references: [id])
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([podcastId, userId])
-}
-
 model BookMark {
   id        String   @id @default(uuid())
   bookId    String
@@ -82,8 +67,6 @@ model Author {
   updatedAt DateTime @updatedAt
 
   translations TranslatedAuthor[]
-  Guests       Podcast[]          @relation("Guests")
-  Podcast      Podcast[]          @relation("Speakers")
   Book         Book[]
 
   @@index([id, name])
@@ -114,11 +97,12 @@ model Book {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  categories   Category[]
-  summaries    Summary[]
-  userProgress userProgress[]
-  BookMark     BookMark[]
-  FreeBooks    FreeBooks?
+  categories       Category[]
+  summaries        Summary[]
+  userProgress     userProgress[]
+  BookMark         BookMark[]
+  FreeBooks        FreeBooks?
+  BookCollection  BookCollection[]
 
   @@index([id, title, slug])
 }
@@ -181,7 +165,6 @@ model Category {
   slug          String               @unique
   books         Book[]
   translations  TranslatedCategory[]
-  podcasts      Podcast[]
 
   @@index([name, slug, id])
 }
@@ -200,67 +183,6 @@ model TranslatedCategory {
   @@index([language])
 }
 
-model PodcastCollection {
-  id           String                        @id @default(uuid())
-  name         String
-  imageUrl     String
-  createdAt    DateTime                      @default(now())
-  updatedAt    DateTime                      @updatedAt
-  slug         String                        @unique
-  translations TranslatedPodcastCollection[]
-  podcastsIds  String[]
-
-  @@index([name, slug, id])
-}
-
-model TranslatedPodcastCollection {
-  id                  String            @id @default(uuid())
-  name                String
-  description         String
-  language            String
-  podcastCollectionId String
-  podcastCollection   PodcastCollection @relation(fields: [podcastCollectionId], references: [id], onDelete: Cascade)
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-
-  @@unique([podcastCollectionId, language])
-  @@index([language])
-}
-
-model Podcast {
-  id              String              @id @default(uuid())
-  title           String
-  imageUrl        String
-  totalDuration   Int
-  published       Boolean
-  slug            String              @unique
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  categories      Category[]
-  translations    TranslatedPodcast[]
-  speakers        Author[]            @relation("Speakers")
-  guests          Author[]            @relation("Guests")
-  podcastProgress podcastProgress[]
-
-  @@index([title])
-}
-
-model TranslatedPodcast {
-  id           String   @id @default(uuid())
-  title        String
-  description  String?
-  summary      String
-  audioUrl     String?
-  imageUrl     String?
-  keyTakeaways String[]
-  language     String
-  podcastId    String
-  podcast      Podcast  @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-
-  @@unique([podcastId, language])
-  @@index([language])
-}
-
 model BookCollection {
   id                       String                     @id @default(uuid())
   title                    String
@@ -268,7 +190,7 @@ model BookCollection {
   slug                     String                     @unique
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @updatedAt
-  books                    String[]
+  books                    Book[]
   TranslatedBookCollection TranslatedBookCollection[]
 
   @@index([id])

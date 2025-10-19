@@ -354,40 +354,6 @@ export const createUserProgress = async (progress: any, userId: string): Promise
                 });
                 return Progress;
             }
-            }else {
-                const checkExisting = await prisma.podcastProgress.findFirst({
-                    where: {
-                        userId: userId,
-                        podcastId: progress.podcastId,
-                    }
-                });
-                if (checkExisting) {
-                    Progress = await prisma.podcastProgress.update({
-                        where: {
-                            podcastId_userId: {
-                                podcastId: progress.podcastId,
-                                userId: userId
-                            }
-                        },
-                        data: { 
-                            podcastId: progress.podcastId,
-                            lastMinute: progress.lastMinute,
-                            completed: progress.completed,
-                            userId: userId
-                         },
-                    });
-                    return Progress;
-                } else {
-                    Progress = await prisma.podcastProgress.create({
-                        data: { 
-                            podcastId: progress.podcastId,
-                            lastMinute: progress.lastMinute,
-                            completed: progress.completed,
-                            userId: userId
-                         },
-                    });
-                    return Progress;
-                }
             }
         }, {
             timeout: 30000 // Increase timeout to 30 seconds
@@ -502,44 +468,6 @@ export const getCompletedUserProgress = async (userId: string, page: string, lan
     }
 };
 
-export const getIncompletePodcastProgress = async (userId: string, page: string, language: string) => {
-    try {
-        const pageNumber = parseInt(page) || 1;
-        const limit = 10;
-        const skip = (pageNumber - 1) * limit;
-
-        const result = await prisma.podcastProgress.findMany({
-            where: {
-                userId: userId,
-                completed: false
-            },
-            skip,
-            take: limit,
-            select: {
-                podcast: {
-                    select: {
-                        translations: {
-                            where: {
-                                language: language
-                            },
-                            select: {
-                                podcastId: true,
-                                title: true,
-                                imageUrl: true
-                            }
-                        }
-                    }
-                },
-                lastMinute: true,
-                completed: true
-            }
-        });
-        return result;
-    } catch (error: unknown) {
-        console.error(error);
-        return 'Failed to get incomplete podcast progress';
-    }
-};
 
 // Bookmark methods
 export const createBookmark = async (bookmark: Omit<BookMark, 'id' | 'createdAt' | 'updatedAt'>, userId: string): Promise<any | string> => {

@@ -125,6 +125,7 @@ export const addCollectionsToPageHandler = asyncHandle(async (req: FastifyReques
 export const getPageBySlugHandler = asyncHandle(async (req: FastifyRequest, reply: FastifyReply) => {
     const { slug } = req.params as { slug: string };
     console.log("slug", slug);
+    console.log("Entered getPageBySlugHandler");
     const page = await getPageBySlug(slug);
     if (typeof page === 'string') {
         return errorHandle(page, reply, 500);
