@@ -37,18 +37,28 @@ const start = async (): Promise<void> => {
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true
     };
+    
+    console.log('🔒 CORS Configuration:');
+    console.log('   Allowed Origins:', corsOrigins);
+    console.log('   Allowed Methods:', corsOptions.methods);
+    
     await fastify.register(fastifyCors, corsOptions);
     
     // Register multipart first so parser is available for all routes
     const maxFileSizeMb = process.env.MAX_FILE_SIZE_MB ? parseInt(process.env.MAX_FILE_SIZE_MB) : 100; // default 100MB for audio files
+    const maxFieldSizeMb = process.env.MAX_FIELD_SIZE_MB ? parseInt(process.env.MAX_FIELD_SIZE_MB) : 100; // default 10MB for JSON metadata
     await fastify.register(multipart, {
       limits: {
         fileSize: maxFileSizeMb * 1024 * 1024, // Convert MB to bytes
         files: 10, // Maximum number of files
-        fieldSize: 1024 * 1024, // 1MB for field values (JSON data)
+        fieldSize: maxFieldSizeMb * 1024 * 1024, // Field size limit (JSON data, etc.)
         fields: 50, // Maximum number of fields
       }
     });
+    
+    console.log('📤 Multipart Configuration:');
+    console.log(`   Max File Size: ${maxFileSizeMb}MB`);
+    console.log(`   Max Field Size: ${maxFieldSizeMb}MB`);
 
     // Swagger/OpenAPI setup
     await fastify.register(swagger, {
